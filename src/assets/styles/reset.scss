@@ -1,0 +1,21 @@
+$success: #67c23a;
+$success_hover: #85ce61;
+$success_active: #5daf34;
+.ant-btn-success {
+  color: #fff;
+  background-color: $success;
+  border-color: $success;
+  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.12);
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.045);
+  &:hover, :focus {
+    color: #fff;
+    background-color: $success_hover;
+    border-color: $success_hover;
+  }
+  &:active{
+    color: #fff;
+    background-color: $success_active;
+    border-color: $success_active;
+    outline: none;
+  }
+}
