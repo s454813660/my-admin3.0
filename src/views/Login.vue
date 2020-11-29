@@ -33,15 +33,15 @@
               <a-input v-model:value="ruleForm.captcha" type="text" :maxlength="6" autocomplete="off"/>
             </a-col>
             <a-col :span="9">
-              <a-button class="ant-btn-success" block>获取验证码</a-button>
+              <a-button class="ant-btn-success" block @click="GetCaptcha">获取验证码</a-button>
             </a-col>
           </a-row>
           <!-- <a-input v-model:value="ruleForm.captcha" type="text" :maxlength="6" autocomplete="off"/> -->
           <!-- <a-button class="ant-btn-success">获取验证码</a-button> -->
         </a-form-item> 
         <a-form-item class="">
-          <a-button type="danger" html-type="submit" block class="login-btn">
-            登陆
+          <a-button :disabled="false" type="danger" html-type="submit" block class="login-btn">
+            {{ menuTab[currentIndex].txt }}
           </a-button>
         </a-form-item>
       </a-form>
@@ -49,11 +49,21 @@
   </div>
 </template>
 <script>
+// 请求接口
+import { getCaptcha } from "@/network/login.js"
+//  composition api
 import { onMounted, onBeforeMount, reactive, ref } from "vue";
+// 验证工具
 import { checkEmail, checkPass, stripscript } from "@/libs/validateTools";
+// 公用工具
+import { awaitWrap } from "@/libs/utils/tools"
+// 弹窗组件
+import { message } from "ant-design-vue";
 export default {
   name: "Login",
   setup(props, ctx) {
+    console.log(ctx);
+    // 获取refs元素
     const ruleFormRef = ref(null);
     // data
     const menuTab = reactive([
@@ -149,11 +159,28 @@ export default {
     function handleFinishFailed(errors) {
       console.log(errors);
     };
+
+    // 获取验证码
+    async function GetCaptcha() {
+      // 验证邮箱是否为空，为空则返回false
+      if(ruleForm.username === "") {
+        message.warning("邮箱不能为空！")
+        return false;
+      };
+      // 验证邮箱格式，不正确则返回false
+      if(!checkEmail(ruleForm.username)) {
+        message.warning("邮箱格式不正确，请重新输入！");
+        return false;
+      }
+      let data = {
+          username:ruleForm.username,
+          module: "login"
+        };
+      const [err, res] = await awaitWrap(getCaptcha(data));
+    }
     // liefcycle hooks
     onBeforeMount(() => {});
-    onMounted(() => {
-      
-    });
+    onMounted(() => {});
 
     return {
       ruleFormRef,
@@ -170,6 +197,7 @@ export default {
       toggleMenu,
       handleFinish,
       handleFinishFailed,
+      GetCaptcha
     };
   }
 };
@@ -201,7 +229,7 @@ export default {
     background-color: rgba(0, 0, 0, 0.1);
   }
 }
-/deep/ .login-form {
+:deep() .login-form {
   margin-top: 35px;
   label {
     display: block;

@@ -1,3 +1,4 @@
+// 防抖
 export function debounce(fn, delay = 500) {
   let timer = null;
   return function() {
@@ -9,7 +10,7 @@ export function debounce(fn, delay = 500) {
     }, delay)
   }
 };
-
+// 节流
 export function throttle(fn, delay) {
   let start = new Date().getTime();
   return function () {
@@ -20,3 +21,9 @@ export function throttle(fn, delay) {
     }
   }
 }
+// async await捕获错误
+export const awaitWrap = promise => {
+  return promise
+          .then(res => [null, res])
+          .catch(err => [err, null]);
+};
