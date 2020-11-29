@@ -18,4 +18,11 @@ $success_active: #5daf34;
     border-color: $success_active;
     outline: none;
   }
+  &[disabled] {
+    color: rgba(0,0,0,.75);
+    background-color: #f5f5f5;
+    border-color: #d9d9d9;
+    text-shadow: none;
+    box-shadow: none;
+  }
 }

@@ -7,6 +7,7 @@
            :class="{ current: currentIndex === index }"
            @click="toggleMenu(index)">{{ item.txt }}</li>
       </ul>
+      <!-- form表单 -->
       <a-form
         name="custom-validation"
         ref="ruleFormRef"
@@ -27,17 +28,14 @@
           <a-input v-model:value="ruleForm.checkpass" type="password" autocomplete="off" />
         </a-form-item>
         <a-form-item name="captcha" label="验证码" class="form-item">
-          <!-- <a-input v-model:value="ruleForm.captcha" type="text" :maxlength="6" autocomplete="off"/> -->
           <a-row :gutter="10">
             <a-col :span="15">
               <a-input v-model:value="ruleForm.captcha" type="text" :maxlength="6" autocomplete="off"/>
             </a-col>
             <a-col :span="9">
-              <a-button class="ant-btn-success" block @click="GetCaptcha">获取验证码</a-button>
+              <a-button :disabled="captchaBtnStatus.status" class="ant-btn-success" block @click="GetCaptcha">{{ captchaBtnStatus.text }}</a-button>
             </a-col>
           </a-row>
-          <!-- <a-input v-model:value="ruleForm.captcha" type="text" :maxlength="6" autocomplete="off"/> -->
-          <!-- <a-button class="ant-btn-success">获取验证码</a-button> -->
         </a-form-item> 
         <a-form-item class="">
           <a-button :disabled="false" type="danger" html-type="submit" block class="login-btn">
@@ -50,7 +48,8 @@
 </template>
 <script>
 // 请求接口
-import { getCaptcha } from "@/network/login.js"
+import { getCaptcha, login } from "@/network/login.js";
+import { register } from "@/network/register.js";
 //  composition api
 import { onMounted, onBeforeMount, reactive, ref } from "vue";
 // 验证工具
@@ -62,7 +61,6 @@ import { message } from "ant-design-vue";
 export default {
   name: "Login",
   setup(props, ctx) {
-    console.log(ctx);
     // 获取refs元素
     const ruleFormRef = ref(null);
     // data
@@ -70,8 +68,15 @@ export default {
       {txt: "登陆", model: "login"}, 
       {txt: "注册", model: "register"}
       ]);
+    // 登录/注册按钮状态
+    const loginBtnStatus = ref(true);
+    // 获取验证码按钮状态
+    const captchaBtnStatus = reactive({
+      status: false,
+      text: "获取验证码"
+    });
+    // 记录当前状态
     let currentIndex = ref(0);
-    let isActive = ref(true);
 
     // 邮箱验证规则
     let validateUsername = async (rule, value) => {
@@ -101,7 +106,6 @@ export default {
     };
     // 重复密码验证
     let validateCheckpass = async (rule, value, callback) => {
-      console.log(menuTab[currentIndex.value].model);
       if(menuTab[currentIndex.value].model === "login") {
         return Promise.resolve();
       }
@@ -149,19 +153,72 @@ export default {
       wrapperCol: { span: 24 },
     });
     // methods
+    // 切换注册登录
     function toggleMenu(index) {
       currentIndex.value = index;
+      // console.log(ruleFormRef);
+      // 切换清除表单
+      ruleFormRef.value.resetFields();
+      captchaBtnStatus.text = "获取验证码";
     };
     
-    function handleFinish(values) {
-      alert("登陆成功")
+    async function handleFinish(values) {
+      
+      // 判断是否是注册，注册就走注册接口，否则走登陆接口
+      if(menuTab[currentIndex.value].model === "register"){
+        let reqData = {
+          username: values.username,
+          password: values.password,
+          code: values.captcha
+        };
+        const [err, res] = await awaitWrap(register(reqData));
+        console.log(values);
+        console.log(res);
+        let resData = res? res.data : "";
+        if(resData) {
+          message.success(resData.message);
+          ruleFormRef.value.resetFields();
+        };
+      }else {
+        let reqData = {
+          username: values.username,
+          password: values.password,
+          code: values.captcha
+        };
+        const [err, res] = await awaitWrap(login(reqData));
+        console.log(values);
+        console.log(res);
+        let resData = res? res.data : "";
+        if(resData) {
+          message.success(resData.message);
+          ruleFormRef.value.resetFields();
+        }
+      }
     };
     function handleFinishFailed(errors) {
       console.log(errors);
+      errors.errorFields.forEach( item => {
+        message.warning(item.errors);
+      })
     };
 
+    function countdown(delay) {
+      let timer = ref(null);
+      
+      timer = setInterval(() => {
+        delay--;
+        captchaBtnStatus.text = `倒计时${delay}秒`;
+        if(delay < 10) {captchaBtnStatus.text = `倒计时0${delay}秒`};
+        if(delay === 0) {
+          clearInterval(timer);
+          captchaBtnStatus.text = "再次获取";
+          captchaBtnStatus.status = false;
+          };
+      }, 1000);
+    }
+
     // 获取验证码
-    async function GetCaptcha() {
+    function GetCaptcha() {
       // 验证邮箱是否为空，为空则返回false
       if(ruleForm.username === "") {
         message.warning("邮箱不能为空！")
@@ -172,11 +229,22 @@ export default {
         message.warning("邮箱格式不正确，请重新输入！");
         return false;
       }
-      let data = {
+      let reqData = {
           username:ruleForm.username,
-          module: "login"
+          module: menuTab[currentIndex.value].model
         };
-      const [err, res] = await awaitWrap(getCaptcha(data));
+      // 改变获取验证码按钮的状态
+      captchaBtnStatus.status = true;
+      captchaBtnStatus.text = "发送中";
+      setTimeout(async () => {
+        const [err, res] = await awaitWrap(getCaptcha(reqData));
+        let resData = res.data;
+        message.success(resData.message);
+        console.log(resData);
+        loginBtnStatus.value = false;
+
+        countdown(60);
+      }, 3000)
     }
     // liefcycle hooks
     onBeforeMount(() => {});
@@ -187,8 +255,8 @@ export default {
       // data
       menuTab,
       currentIndex,
-      isActive,
-
+      loginBtnStatus,
+      captchaBtnStatus,
 
       ruleForm,
       rules,
