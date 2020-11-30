@@ -38,7 +38,7 @@
           </a-row>
         </a-form-item> 
         <a-form-item class="">
-          <a-button :disabled="false" type="danger" html-type="submit" block class="login-btn">
+          <a-button :disabled="loginBtnStatus" type="danger" html-type="submit" block class="login-btn">
             {{ menuTab[currentIndex].txt }}
           </a-button>
         </a-form-item>
@@ -58,9 +58,13 @@ import { checkEmail, checkPass, stripscript } from "@/libs/validateTools";
 import { awaitWrap } from "@/libs/utils/tools"
 // 弹窗组件
 import { message } from "ant-design-vue";
+// 路由
+import { useRouter } from "vue-router";
 export default {
   name: "Login",
   setup(props, ctx) {
+    const router = useRouter();
+    console.log(router);
     // 获取refs元素
     const ruleFormRef = ref(null);
     // data
@@ -77,7 +81,8 @@ export default {
     });
     // 记录当前状态
     let currentIndex = ref(0);
-
+    // 倒计时定时器
+    let timer = ref(null);
     // 邮箱验证规则
     let validateUsername = async (rule, value) => {
       if (value === '') {
@@ -159,42 +164,59 @@ export default {
       // console.log(ruleFormRef);
       // 切换清除表单
       ruleFormRef.value.resetFields();
-      captchaBtnStatus.text = "获取验证码";
+      clearCountdown();
     };
-    
+    // 提交成功回调
     async function handleFinish(values) {
-      
       // 判断是否是注册，注册就走注册接口，否则走登陆接口
       if(menuTab[currentIndex.value].model === "register"){
-        let reqData = {
-          username: values.username,
-          password: values.password,
-          code: values.captcha
-        };
-        const [err, res] = await awaitWrap(register(reqData));
-        console.log(values);
-        console.log(res);
-        let resData = res? res.data : "";
-        if(resData) {
-          message.success(resData.message);
-          ruleFormRef.value.resetFields();
-        };
+        Register(values);
       }else {
-        let reqData = {
-          username: values.username,
-          password: values.password,
-          code: values.captcha
-        };
-        const [err, res] = await awaitWrap(login(reqData));
-        console.log(values);
-        console.log(res);
-        let resData = res? res.data : "";
-        if(resData) {
-          message.success(resData.message);
-          ruleFormRef.value.resetFields();
-        }
+        Login(values);
       }
     };
+    /**
+     * login
+     */
+    async function Login(values) {
+      let reqData = {
+        username: values.username,
+        password: values.password,
+        code: values.captcha
+      };
+      const [err, res] = await awaitWrap(login(reqData));
+      console.log(values);
+      console.log(res);
+      let resData = res? res.data : "";
+      if(resData) {
+        message.success(resData.message);
+        clearCountdown();
+        captchaBtnStatus.text = "获取验证码";
+        ruleFormRef.value.resetFields();
+        router.push("/index");
+      };
+    };
+
+    /**
+     * register
+     */
+    async function Register(values) {
+      let reqData = {
+        username: values.username,
+        password: values.password,
+        code:values.captcha
+      };
+      const [err, res] = await awaitWrap(register(reqData));
+      let resData = res? res.data : "";
+      if(resData) {
+        message.success(resData.message);
+        ruleFormRef.value.resetFields();
+        captchaBtnStatus.text = "获取验证码";
+        clearCountdown();
+        toggleMenu(0);
+      };
+    };
+    // 提交错误回调
     function handleFinishFailed(errors) {
       console.log(errors);
       errors.errorFields.forEach( item => {
@@ -202,9 +224,15 @@ export default {
       })
     };
 
+    // 清空定时器
+    function clearCountdown() {
+      clearInterval(timer);
+      captchaBtnStatus.status = false;
+      captchaBtnStatus.text = "获取验证码";
+    }
+    // 倒计时
     function countdown(delay) {
-      let timer = ref(null);
-      
+      if(timer) clearInterval(timer);
       timer = setInterval(() => {
         delay--;
         captchaBtnStatus.text = `倒计时${delay}秒`;
@@ -228,7 +256,7 @@ export default {
       if(!checkEmail(ruleForm.username)) {
         message.warning("邮箱格式不正确，请重新输入！");
         return false;
-      }
+      };
       let reqData = {
           username:ruleForm.username,
           module: menuTab[currentIndex.value].model
@@ -242,7 +270,6 @@ export default {
         message.success(resData.message);
         console.log(resData);
         loginBtnStatus.value = false;
-
         countdown(60);
       }, 3000)
     }

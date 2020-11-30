@@ -19,9 +19,9 @@ $success_active: #5daf34;
     outline: none;
   }
   &[disabled] {
-    color: rgba(0,0,0,.75);
-    background-color: #f5f5f5;
-    border-color: #d9d9d9;
+    color: #fff;
+    background-color: rgba(133, 206, 97, 0.75);
+    border-color:  rgba(133, 206, 97, 0.25);
     text-shadow: none;
     box-shadow: none;
   }
