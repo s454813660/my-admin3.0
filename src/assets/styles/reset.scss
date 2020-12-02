@@ -26,3 +26,35 @@ $success_active: #5daf34;
     box-shadow: none;
   }
 }
+.ant-menu {
+  color: #fff;
+}
+.ant-menu-vertical .ant-menu-item, .ant-menu-vertical-left .ant-menu-item, .ant-menu-vertical-right .ant-menu-item, .ant-menu-inline .ant-menu-item, .ant-menu-vertical .ant-menu-submenu-title, .ant-menu-vertical-left .ant-menu-submenu-title, .ant-menu-vertical-right .ant-menu-submenu-title, .ant-menu-inline .ant-menu-submenu-title{
+  height: 50px;
+  line-height: 50px;
+  margin: 0;
+}
+.ant-menu-vertical > .ant-menu-item, .ant-menu-vertical-left > .ant-menu-item, .ant-menu-vertical-right > .ant-menu-item, .ant-menu-inline > .ant-menu-item, .ant-menu-vertical > .ant-menu-submenu > .ant-menu-submenu-title, .ant-menu-vertical-left > .ant-menu-submenu > .ant-menu-submenu-title, .ant-menu-vertical-right > .ant-menu-submenu > .ant-menu-submenu-title, .ant-menu-inline > .ant-menu-submenu > .ant-menu-submenu-title {
+  height: 50px;
+  line-height: 50px;
+}
+.ant-menu-sub.ant-menu-inline > .ant-menu-item, .ant-menu-sub.ant-menu-inline > .ant-menu-submenu > .ant-menu-submenu-title {
+  height: 50px;
+  line-height: 50px;
+}
+.ant-menu-item-active,
+.ant-menu-item-selected {
+  color: #fff;
+}
+.ant-menu-submenu-title:hover {
+  color: #fff;
+}
+.ant-menu-submenu-title:hover .ant-menu-submenu-arrow::before {
+  background: #fff;
+}
+.ant-menu-submenu-active {
+  color: #fff;
+}
+.ant-menu-submenu-active .ant-menu-submenu-arrow {
+  color: #fff;
+}

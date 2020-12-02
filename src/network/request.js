@@ -11,6 +11,7 @@ export function request(config) {
   });
   
   instance.interceptors.request.use(config => {
+    config.headers.userId = "123"
 
     return config;
   }, err => {

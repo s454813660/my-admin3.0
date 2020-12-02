@@ -8,6 +8,7 @@
            @click="toggleMenu(index)">{{ item.txt }}</li>
       </ul>
       <!-- form表单 -->
+      
       <a-form
         name="custom-validation"
         ref="ruleFormRef"
@@ -24,7 +25,10 @@
         <a-form-item has-feedback label="密码" name="password" class="form-item">
           <a-input v-model:value="ruleForm.password" type="password" autocomplete="off" />
         </a-form-item>
-        <a-form-item has-feedback label="重复密码" name="checkpass" class="form-item" v-show="menuTab[currentIndex].model === 'register'">
+        <a-form-item has-feedback label="重复密码" 
+                    name="checkpass" class="form-item"
+                    v-show="menuTab[currentIndex].model === 'register'"
+                    >
           <a-input v-model:value="ruleForm.checkpass" type="password" autocomplete="off" />
         </a-form-item>
         <a-form-item name="captcha" label="验证码" class="form-item">
@@ -60,6 +64,8 @@ import { awaitWrap } from "@/libs/utils/tools"
 import { message } from "ant-design-vue";
 // 路由
 import { useRouter } from "vue-router";
+
+import sha1 from "js-sha1";
 export default {
   name: "Login",
   setup(props, ctx) {
@@ -73,7 +79,7 @@ export default {
       {txt: "注册", model: "register"}
       ]);
     // 登录/注册按钮状态
-    const loginBtnStatus = ref(true);
+    const loginBtnStatus = ref(false);
     // 获取验证码按钮状态
     const captchaBtnStatus = reactive({
       status: false,
@@ -163,11 +169,15 @@ export default {
       currentIndex.value = index;
       // console.log(ruleFormRef);
       // 切换清除表单
-      ruleFormRef.value.resetFields();
+      resetForm();
       clearCountdown();
     };
     // 提交成功回调
-    async function handleFinish(values) {
+    function handleFinish(values) {
+      //调试
+      // const pass = sha1(values.password);
+      // console.log(pass);
+      // return false;
       // 判断是否是注册，注册就走注册接口，否则走登陆接口
       if(menuTab[currentIndex.value].model === "register"){
         Register(values);
@@ -184,16 +194,19 @@ export default {
         password: values.password,
         code: values.captcha
       };
+      console.log(reqData);
       const [err, res] = await awaitWrap(login(reqData));
-      console.log(values);
+      
       console.log(res);
       let resData = res? res.data : "";
       if(resData) {
         message.success(resData.message);
         clearCountdown();
         captchaBtnStatus.text = "获取验证码";
-        ruleFormRef.value.resetFields();
-        router.push("/index");
+        resetForm();
+        router.push({
+          name: "Admin"
+        });
       };
     };
 
@@ -210,7 +223,7 @@ export default {
       let resData = res? res.data : "";
       if(resData) {
         message.success(resData.message);
-        ruleFormRef.value.resetFields();
+        resetForm();
         captchaBtnStatus.text = "获取验证码";
         clearCountdown();
         toggleMenu(0);
@@ -229,6 +242,11 @@ export default {
       clearInterval(timer);
       captchaBtnStatus.status = false;
       captchaBtnStatus.text = "获取验证码";
+    }
+
+    // 重置表单
+    function resetForm() {
+      ruleFormRef.value.resetFields();
     }
     // 倒计时
     function countdown(delay) {
