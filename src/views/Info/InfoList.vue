@@ -1,11 +1,9 @@
 <template>
-  <div id="console">
-    首页
-  </div>
+  InfoList
 </template>
 <script>
 export default {
-  name: 'Console'
+  name: 'InfoList',
 }
 </script>
 <style scoped>

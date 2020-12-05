@@ -10,9 +10,14 @@ export default {
 </script>
 <style lang="scss" scoped>
 #layout-main {
+  position: absolute;
+  top: 75px;
+  left: 250px;
+  right: 0;
+  bottom: 0;
   background-color: #fff;
-  flex: 1;
-  margin: 30px 0 0 30px;
+  border: 30px solid #f7f7f7;
+  border-bottom: none;
 }
 
 </style>

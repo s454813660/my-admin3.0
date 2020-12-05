@@ -1,11 +1,9 @@
 <template>
-  <div id="console">
-    首页
-  </div>
+user
 </template>
 <script>
 export default {
-  name: 'Console'
+  name: 'User',
 }
 </script>
 <style scoped>

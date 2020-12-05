@@ -1,10 +1,8 @@
 <template>
   <div id="layout">
     <LayoutNav />
-    <div class="left-wrap">
-      <LayoutHeader />
-      <LayoutMain />
-    </div>
+    <LayoutHeader />
+    <LayoutMain />
   </div>
 </template>
 <script>
@@ -21,13 +19,4 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
-#layout {
-  display: flex;
-  background-color: #f7f7f7;
-  .left-wrap {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-  }
-}
 </style>

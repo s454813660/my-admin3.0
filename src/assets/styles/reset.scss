@@ -27,34 +27,43 @@ $success_active: #5daf34;
   }
 }
 .ant-menu {
+  background-color: transparent;
   color: #fff;
 }
-.ant-menu-vertical .ant-menu-item, .ant-menu-vertical-left .ant-menu-item, .ant-menu-vertical-right .ant-menu-item, .ant-menu-inline .ant-menu-item, .ant-menu-vertical .ant-menu-submenu-title, .ant-menu-vertical-left .ant-menu-submenu-title, .ant-menu-vertical-right .ant-menu-submenu-title, .ant-menu-inline .ant-menu-submenu-title{
+.ant-menu-submenu {
+  color: #fff;
+}
+.ant-menu-submenu-active::hover {
+  color: #fff;
+}
+
+.ant-menu-inline .ant-menu-item, .ant-menu-inline .ant-menu-submenu-title {
+  width: 100%;
+}
+
+.ant-menu-inline > .ant-menu-submenu > .ant-menu-submenu-title, .ant-menu-sub.ant-menu-inline > .ant-menu-item, .ant-menu-sub.ant-menu-inline > .ant-menu-submenu > .ant-menu-submenu-title{
   height: 50px;
   line-height: 50px;
+}
+.ant-menu-inline .ant-menu-item, .ant-menu-inline .ant-menu-submenu-title {
   margin: 0;
 }
-.ant-menu-vertical > .ant-menu-item, .ant-menu-vertical-left > .ant-menu-item, .ant-menu-vertical-right > .ant-menu-item, .ant-menu-inline > .ant-menu-item, .ant-menu-vertical > .ant-menu-submenu > .ant-menu-submenu-title, .ant-menu-vertical-left > .ant-menu-submenu > .ant-menu-submenu-title, .ant-menu-vertical-right > .ant-menu-submenu > .ant-menu-submenu-title, .ant-menu-inline > .ant-menu-submenu > .ant-menu-submenu-title {
-  height: 50px;
-  line-height: 50px;
+.ant-menu-inline .ant-menu-item::after {
+  border: none;
 }
-.ant-menu-sub.ant-menu-inline > .ant-menu-item, .ant-menu-sub.ant-menu-inline > .ant-menu-submenu > .ant-menu-submenu-title {
-  height: 50px;
-  line-height: 50px;
-}
-.ant-menu-item-active,
-.ant-menu-item-selected {
+.ant-menu:not(.ant-menu-horizontal) .ant-menu-item-selected {
+  background-color: rgba(245, 108, 108, 0.2);
   color: #fff;
 }
-.ant-menu-submenu-title:hover {
-  color: #fff;
+.ant-menu-submenu-selected {
+  &>.ant-menu-submenu-title {
+    background-color: #f56c6c;
+    color: #fff;
+  }
+  .ant-menu-submenu-arrow::before, .ant-menu-submenu-arrow::after{
+    color: #fff;
+  }
 }
-.ant-menu-submenu-title:hover .ant-menu-submenu-arrow::before {
-  background: #fff;
-}
-.ant-menu-submenu-active {
-  color: #fff;
-}
-.ant-menu-submenu-active .ant-menu-submenu-arrow {
-  color: #fff;
+.ant-menu-submenu > .ant-menu {
+  background-color: transparent;
 }

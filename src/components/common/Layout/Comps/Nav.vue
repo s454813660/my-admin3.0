@@ -1,48 +1,25 @@
 <template>
   <div id="layout-nav">
+    <div class="logo">
+      <img src="https://cn.vuejs.org/images/logo.png" alt="">
+    </div>
     <a-menu
       v-model:openKeys="openKeys"
       v-model:selectedKeys="selectedKeys"
       mode="inline"
       :inline-collapsed="collapsed"
       class="nav-menu"
+      @click="toggleMenu($event)"
     >
-      <a-menu-item key="1">
-        <PieChartOutlined />
-        <span>Option 1</span>
-      </a-menu-item>
-      <a-menu-item key="2">
-        <DesktopOutlined />
-        <span>Option 2</span>
-      </a-menu-item>
-      <a-menu-item key="3">
-        <InboxOutlined />
-        <span>Option 3</span>
-      </a-menu-item>
-      <a-sub-menu key="sub1">
-        <template #title>
-          <span><MailOutlined /><span>Navigation One</span></span>
-        </template>
-        <a-menu-item key="5">Option 5</a-menu-item>
-        <a-menu-item key="6">Option 6</a-menu-item>
-        <a-menu-item key="7">Option 7</a-menu-item>
-        <a-menu-item key="8">Option 8</a-menu-item>
-      </a-sub-menu>
-      <a-sub-menu key="sub2">
-        <template #title>
-          <span><AppstoreOutlined /><span>Navigation Two</span></span>
-        </template>
-        <a-menu-item key="9">Option 9</a-menu-item>
-        <a-menu-item key="10">Option 10</a-menu-item>
-        <a-sub-menu key="sub3" title="Submenu">
-          <a-menu-item key="11">
-            Option 11
-          </a-menu-item>
-          <a-menu-item key="12">
-            Option 12
-          </a-menu-item>
+      <template v-for="item in routes">
+        <a-sub-menu v-if="!item.hidden" :key="item.path">
+          <template #title>
+            <DashboardOutlined />
+            <span v-if="item.meta">{{item.meta.title}}</span>
+          </template>
+          <a-menu-item v-for="subItem in item.children" :key="subItem.path">{{subItem.meta.title}}</a-menu-item>
         </a-sub-menu>
-      </a-sub-menu>
+      </template>
     </a-menu>
   </div>
 </template>
@@ -50,65 +27,65 @@
 import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
-  PieChartOutlined,
-  MailOutlined,
-  DesktopOutlined,
-  InboxOutlined,
+  MenuOutlined,
+  DashboardOutlined,
   AppstoreOutlined,
 } from '@ant-design/icons-vue';
 import { ref, reactive, watch, toRefs } from "vue";
+import { useRouter } from "vue-router";
 export default {
   name: 'Nav',
   components: {
     MenuFoldOutlined,
     MenuUnfoldOutlined,
-    PieChartOutlined,
-    MailOutlined,
-    DesktopOutlined,
-    InboxOutlined,
+    MenuOutlined,
+    DashboardOutlined,
     AppstoreOutlined,
   },
   setup() {
+    const router = useRouter();
+    const routes = router.options.routes;
     // data
     const collapsed = ref(false);
     /**
      * 暂时不清楚为什么一定要ref声明才不会有bug，reactive声明toRefs也会有warning
      */
-    const selectedKeys = ref(["1"]);
-    const openKeys = ref(["sub1"]);
-    const preOpenKeys = ref(["sub2"]);
+    const selectedKeys = ref(["/admin/index"]);
+    const openKeys = ref([routes[2].path]);
+    const preOpenKeys = ref([routes[2].path]);
     
     // methods
-
+    function toggleMenu(e) {
+      const currentRoute = e.key;
+      router.push(currentRoute);
+    }
     //watch
     return {
       collapsed,
       selectedKeys,
       openKeys,
       preOpenKeys,
+      toggleMenu,
+      routes
     }
   }
 }
 </script>
 <style lang="scss" scoped>
 #layout-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
   width: 250px;
   background-color: #344a5f;
-  height: 100vh;
-  :deep() .nav-menu {
-    background-color: transparent;
-    .ant-menu-sub{
-      background-color: transparent;
-    };
-    .ant-menu-item {
-      width: 100%;
-      &::after {
-        display: none;
-      }
-    };
-  }
-  .ant-menu-item-selected {
-    background-color: #f56c6c;
+  font-size: 17px;
+  .logo {
+    margin: 31px 90px 22px 90px;
+    img {
+      width: 70px;
+      height: 60px;
+    }
   }
 }
 </style>
