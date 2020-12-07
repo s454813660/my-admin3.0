@@ -20,7 +20,8 @@ const routes = [
     path: "/admin",
     name: "Admin",
     meta: {
-      title: "控制台"
+      title: "控制台",
+      icon: "console"
     },
     redirect: "/admin/index",
     component: Admin,
@@ -39,7 +40,8 @@ const routes = [
     path: "/info",
     name: "Info",
     meta: {
-      title: "信息管理"
+      title: "信息管理",
+      icon: "info"
     },
     component: Admin,
     redirect: "/admin/infoList",
@@ -68,7 +70,8 @@ const routes = [
     redirect: "/admin/user",
     component: Admin,
     meta: {
-      title: "用户管理"
+      title: "用户管理",
+      icon: "user"
     },
     children: [
       {

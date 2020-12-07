@@ -1,2 +1,12 @@
 @import "./normalize.scss";
 @import "./reset.scss";
+
+$menuWidth: 250px;
+$menuMinWidth: 80px;
+
+.pull-left {
+  float: left;
+}
+.pull-right {
+  float: right;
+}

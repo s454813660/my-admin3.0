@@ -10,6 +10,22 @@ module.exports = {
    * webpack配置,see https://github.com/vuejs/vue-cli/blob/dev/docs/webpack.md
    **/
   chainWebpack: (config) => {
+    config.module
+   	    .rule('svg')
+   	    .exclude.add(path.resolve(__dirname, 'src/components/content/icons'))
+   	    .end()
+   	
+   	    config.module
+   	    .rule('icons')
+   	    .test(/\.svg$/)
+   	    .include.add(path.resolve(__dirname, 'src/components/content/icons'))
+   	    .end()
+   	    .use('svg-sprite-loader')
+   	    .loader('svg-sprite-loader')
+   	    .options({
+   	      symbolId: 'icon-[name]'
+   	    })
+   	    .end()
   },
   configureWebpack: (config) => {
     // config.resolve = { // 配置解析别名
@@ -23,6 +39,20 @@ module.exports = {
     //     'views': path.resolve(__dirname, './src/views'),
     //     'data': path.resolve(__dirname, './src/data')
     //   }
+    // }
+
+    // module: {
+    //   rules: [
+    //     {
+    //       test: /\.svg$/,
+    //       use: [{
+    //         loader: "svg-sprite-loader",
+    //         options: {
+    //           symbolId: "icon-[name]"
+    //         }
+    //       }]
+    //     }
+    //   ]
     // }
   },
   // 生产环境是否生成 sourceMap 文件

@@ -1,5 +1,5 @@
 <template>
-  <div id="layout-nav">
+  <div id="layout-nav" :class="[!collapsed? 'open': 'close']">
     <div class="logo">
       <img src="https://cn.vuejs.org/images/logo.png" alt="">
     </div>
@@ -14,7 +14,8 @@
       <template v-for="item in routes">
         <a-sub-menu v-if="!item.hidden" :key="item.path">
           <template #title>
-            <DashboardOutlined />
+            <icon-font :type="`icon-${item.meta.icon}`" style="font-size:1.2em; vertical-align:middle"></icon-font>
+            <!-- <svg-icon class="sub-menu-icon" :icon-class="item.meta.icon"></svg-icon> -->
             <span v-if="item.meta">{{item.meta.title}}</span>
           </template>
           <a-menu-item v-for="subItem in item.children" :key="subItem.path">{{subItem.meta.title}}</a-menu-item>
@@ -24,29 +25,22 @@
   </div>
 </template>
 <script>
-import {
-  MenuFoldOutlined,
-  MenuUnfoldOutlined,
-  MenuOutlined,
-  DashboardOutlined,
-  AppstoreOutlined,
-} from '@ant-design/icons-vue';
-import { ref, reactive, watch, toRefs } from "vue";
+import { createFromIconfontCN } from '@ant-design/icons-vue';
+import { ref, reactive, watch, toRefs, inject } from "vue";
 import { useRouter } from "vue-router";
+const IconFont = createFromIconfontCN({
+  scriptUrl: "//at.alicdn.com/t/font_2250507_yd6cye03qvj.js",
+})
 export default {
   name: 'Nav',
   components: {
-    MenuFoldOutlined,
-    MenuUnfoldOutlined,
-    MenuOutlined,
-    DashboardOutlined,
-    AppstoreOutlined,
+    IconFont
   },
   setup() {
     const router = useRouter();
     const routes = router.options.routes;
     // data
-    const collapsed = ref(false);
+    const collapsed = inject("collapsed");
     /**
      * 暂时不清楚为什么一定要ref声明才不会有bug，reactive声明toRefs也会有warning
      */
@@ -77,15 +71,28 @@ export default {
   top: 0;
   left: 0;
   bottom: 0;
-  width: 250px;
+  // width: $menuWidth;
   background-color: #344a5f;
   font-size: 17px;
+  transition: ease 0.3s;
+  &.open {
+    width: $menuWidth;
+  }
+  &.close {
+    width: $menuMinWidth;
+  }
   .logo {
-    margin: 31px 90px 22px 90px;
+    // margin: 31px 90px 22px 90px; 
+    width: 100%;
     img {
+      margin: 31px auto 22px;
       width: 70px;
       height: 60px;
     }
+  }
+  .sub-menu-icon {
+    margin-right: 10px;
+    color: #fff;
   }
 }
 </style>

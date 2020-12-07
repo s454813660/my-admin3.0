@@ -55,6 +55,7 @@ $success_active: #5daf34;
   background-color: rgba(245, 108, 108, 0.2);
   color: #fff;
 }
+
 .ant-menu-submenu-selected {
   &>.ant-menu-submenu-title {
     background-color: #f56c6c;
@@ -64,6 +65,13 @@ $success_active: #5daf34;
     color: #fff;
   }
 }
+.ant-menu-inline-collapsed {
+  > .ant-menu-submenu-selected{
+    .ant-menu-submenu-title {
+      background-color: #f56c6c;
+    }
+  }
+}
 .ant-menu-submenu > .ant-menu {
-  background-color: transparent;
+  background-color:  #344a5f;
 }
