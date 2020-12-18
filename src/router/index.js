@@ -1,6 +1,7 @@
 import { createRouter, createWebHashHistory } from "vue-router";
 
 const Admin = () => import("@/views/Admin");
+
 const routes = [
   {
     path: "/",
@@ -91,4 +92,28 @@ const router = createRouter({
   routes
 });
 
+
+/**
+ * 路由导航守卫
+ */
+import { getToken, removeToken, removeUsername } from "@/libs/utils/app";
+const whiteRoutes = ["/login"];
+router.beforeEach((to, from, next) => {
+  if(getToken()) {
+    if(to.path === "/login") {
+      removeToken();
+      removeUsername();
+      next();
+    }else{
+      next();
+    }
+  }else{
+    if(whiteRoutes.indexOf(to.path) !== -1) {
+      // console.log(to.path);
+      next();
+    }else{
+      next("/login");
+    }
+  };
+})
 export default router;

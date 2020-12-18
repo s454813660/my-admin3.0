@@ -4,11 +4,13 @@
   </div>
 </template>
 <script>
-import {inject} from "vue";
+import { useStore } from "vuex";
+import { computed } from "vue";
 export default {
   name: 'Main',
   setup() {
-    const collapsed = inject("collapsed");
+    const store = useStore();
+    const collapsed = computed(() => store.state.app.iscollapsed);
     return {
       collapsed
     }
@@ -25,7 +27,8 @@ export default {
   background-color: #fff;
   border: 30px solid #f7f7f7;
   border-bottom: none;
-  transition: ease 0.3s;
+  transition: all ease 0.3s;
+  padding: 30px;
   &.open {
     left: $menuWidth;
   }

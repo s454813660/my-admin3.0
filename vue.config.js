@@ -93,7 +93,7 @@ module.exports = {
         target: "http://www.web-jshtml.cn",
         changeOrigin: true,
         pathRewrite: {
-          "^/devApi": "/vue_admin_api"
+          "^/devApi": "/vue_admin_api/token"
         }
       }
     }, // 设置代理

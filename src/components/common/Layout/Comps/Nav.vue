@@ -26,8 +26,9 @@
 </template>
 <script>
 import { createFromIconfontCN } from '@ant-design/icons-vue';
-import { ref, reactive, watch, toRefs, inject } from "vue";
+import { ref, reactive, watch, toRefs, computed } from "vue";
 import { useRouter } from "vue-router";
+import { useStore } from "vuex";
 const IconFont = createFromIconfontCN({
   scriptUrl: "//at.alicdn.com/t/font_2250507_yd6cye03qvj.js",
 })
@@ -38,13 +39,16 @@ export default {
   },
   setup() {
     const router = useRouter();
+    
     const routes = router.options.routes;
+    // console.log(routes)
     // data
-    const collapsed = inject("collapsed");
+    const store = useStore();
+    const collapsed = computed(() => store.state.app.iscollapsed);
     /**
      * 暂时不清楚为什么一定要ref声明才不会有bug，reactive声明toRefs也会有warning
      */
-    const selectedKeys = ref(["/admin/index"]);
+    const selectedKeys = ref([routes[2].redirect]);
     const openKeys = ref([routes[2].path]);
     const preOpenKeys = ref([routes[2].path]);
     

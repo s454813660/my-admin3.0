@@ -6,7 +6,7 @@ import Antd from "ant-design-vue";
 import "ant-design-vue/dist/antd.css";
 
 import SvgIcon from "@/components/SvgIcon";
-import "@/components/content/icons"
+import "@/components/content/icons";
 
 const app = createApp(App);
 app

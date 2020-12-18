@@ -64,13 +64,17 @@ import { awaitWrap } from "@/libs/utils/tools"
 import { message } from "ant-design-vue";
 // 路由
 import { useRouter } from "vue-router";
-
+// 加密
 import sha1 from "js-sha1";
+//存储token
+import { setToken, setUsername } from "@/libs/utils/app";
+import { useStore } from "vuex";
 export default {
   name: "Login",
   setup(props, ctx) {
     const router = useRouter();
-    console.log(router);
+    const store = useStore();
+    // console.log(router);
     // 获取refs元素
     const ruleFormRef = ref(null);
     // data
@@ -201,6 +205,10 @@ export default {
       let resData = res? res.data : "";
       if(resData) {
         message.success(resData.message);
+        setToken(resData.data.token);
+        setUsername(resData.data.username);
+        store.commit("app/SET_TOKEN", resData.data.token);
+        store.commit("app/SET_USERNAME", resData.data.username);
         clearCountdown();
         captchaBtnStatus.text = "获取验证码";
         resetForm();

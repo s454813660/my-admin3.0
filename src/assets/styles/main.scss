@@ -10,3 +10,15 @@ $menuMinWidth: 80px;
 .pull-right {
   float: right;
 }
+
+@mixin labelDom($width, $align, $line-height:"normal") {
+  label {
+    float: left;
+    line-height: $line-height + px;
+    width: $width + px;
+    text-align: $align;
+  }
+  .content-wrap {
+    margin-left: $width + px;
+  }
+}
