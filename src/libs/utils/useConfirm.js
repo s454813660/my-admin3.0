@@ -1,8 +1,8 @@
 import { Modal } from "ant-design-vue";
 import { ExclamationCircleOutlined } from '@ant-design/icons-vue';
 import { createVNode } from "vue";
-export function globalComfirm() {
-  const deleteConfirm = function(params) {
+export function useConfirm() {
+  const Confirm = function(params) {
     Modal.confirm({
       title: params.title,
       icon: createVNode(ExclamationCircleOutlined),
@@ -12,6 +12,6 @@ export function globalComfirm() {
     })
   }
   return {
-    deleteConfirm
+    Confirm
   }
 }

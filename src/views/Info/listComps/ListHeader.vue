@@ -2,7 +2,7 @@
 	<a-row :gutter="16">
 		<a-col>
 			<div class="label-wrap category" style="width:204px">
-				<label for="">类型:</label>
+				<label for="">分类:</label>
 				<div class="content-wrap">
 					<a-select
 						size="large"
@@ -11,12 +11,12 @@
 						v-model:value="type_value"
 						@change="handleChange"
 						style="width:100%"
+						v-if="category_data.list"
 					>
-						<a-select-option value="jack">
-							Jack (100)
-						</a-select-option>
-						<a-select-option value="lucy">
-							Lucy (101)
+						<a-select-option v-for="type in category_data.list"
+														 :key="type.id"
+														 :value="type.id">
+							{{type.category_name}}
 						</a-select-option>
 					</a-select>
 				</div>
@@ -72,9 +72,10 @@
 	<InfoEdit :editVisible="editVisible" @hideEditModal="hideEditModal"/>
 </template>
 <script>
-import { ref } from "vue";
+import { onMounted, ref, reactive } from "vue";
 import { ClockCircleOutlined } from "@ant-design/icons-vue";
 import InfoEdit from "./InfoEdit"
+import { getCategoryAll } from "@/network/category";
 export default {
 	name: "ListHeader",
 	components:{
@@ -87,23 +88,42 @@ export default {
 		const search_value = ref("");
 
 		const editVisible = ref(false);
-		function handleChange(value) {
+
+		const category_data = reactive({
+			list: []
+		})
+		const handleChange = (value) => {
 			console.log(value);
 		}
 		
-		function showEdit() {
+		const showEdit = () => {
 			editVisible.value = true;
 		}
 
-		function hideEditModal() {
+		const hideEditModal = () => {
 			editVisible.value = false;
 		}
+
+		const _getCategoryAll = async () => {
+			let res = await getCategoryAll();
+			console.log(res);
+			let resData = res.data.data;
+			category_data.list = resData;
+		}
+
+		onMounted(() => {
+			_getCategoryAll()
+		})
     return {
+			//ref
       type_value,
 			key_word_value,
 			search_value,
-
 			editVisible,
+			//reactive
+			category_data,
+
+			//mothods
 			handleChange,
 			showEdit,
 			hideEditModal

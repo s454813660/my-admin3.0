@@ -30,7 +30,7 @@ import { ref, reactive, watch, toRefs, computed } from "vue";
 import { useRouter } from "vue-router";
 import { useStore } from "vuex";
 const IconFont = createFromIconfontCN({
-  scriptUrl: "//at.alicdn.com/t/font_2250507_yd6cye03qvj.js",
+  scriptUrl: "//at.alicdn.com/t/font_2250507_32pzfpxdk9m.js",
 })
 export default {
   name: 'Nav',

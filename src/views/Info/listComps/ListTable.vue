@@ -8,16 +8,20 @@
 			size="middle"
 			:pagination="false"
 		>
-			<template #operation="{text: operation}">
-				<template v-for="(item, index) in operation" :key="item.id">
-					<a-button
-						style="margin: 0 4px;"
-						:type="item === '删除' ? 'danger' : 'default'"
-						@click="showModal(index)"
-					>
-						{{ item }}
-					</a-button>
-				</template>
+			<template #operation>
+				<a-button
+					style="margin: 0 4px;"
+					@click="deleteItem"
+					type="danger"
+				>
+					删除
+				</a-button>
+				<a-button
+					style="margin: 0 4px;"
+					@click="editItem"
+				>
+					编辑
+				</a-button>
 			</template>
 		</a-table>
 		<div class="delete-all">
@@ -36,7 +40,7 @@
 </template>
 <script>
 import { reactive, ref, computed } from "vue";
-import { globalComfirm } from "@/libs/utils/global";
+import { useConfirm } from "@/libs/utils/useConfirm";
 import InfoEdit from "./InfoEdit";
 export default {
 	name: "ListTable",
@@ -55,7 +59,7 @@ export default {
 				slots: { customRender: "title" },
 			},
 			{
-				title: "类别",
+				title: "分类",
 				dataIndex: "category",
 				key: "category",
 				align: "center",
@@ -92,7 +96,6 @@ export default {
 				category: "国内信息",
 				date: "2019-09-10 19:31:31",
 				admin: "管理员",
-				operation: ["删除", "编辑"],
 			},
 			{
 				key: "2",
@@ -101,7 +104,6 @@ export default {
 				category: "国内信息",
 				date: "2019-09-10 19:31:31",
 				admin: "张三",
-				operation: ["删除", "编辑"],
 			},
 			{
 				key: "3",
@@ -109,7 +111,6 @@ export default {
 				category: "国内信息",
 				date: "2019-09-10 19:31:31",
 				admin: "李四",
-				operation: ["删除", "编辑"],
 			},
 			{
 				key: "3",
@@ -117,7 +118,6 @@ export default {
 				category: "国内信息",
 				date: "2019-09-10 19:31:31",
 				admin: "李四",
-				operation: ["删除", "编辑"],
 			},
 		]);
 		/**
@@ -136,14 +136,14 @@ export default {
     });
 		
 		/**
-		 * 结构出deleteConfirm方法
+		 * 结构出Confirm方法
 		 */
-		const { deleteConfirm } = globalComfirm();
+		const { Confirm } = useConfirm();
 		/**
 		 * 删除所有事件处理函数
 		 */
 		const deleteAll = () => {
-			deleteConfirm({
+			Confirm({
 				title: "确认删除所有？",
 				success: deleteAllSuccess
 			})
@@ -156,6 +156,15 @@ export default {
 		}
 
 		/**
+		 * 删除当前项事件处理函数
+		 */
+		const deleteItem = () => {
+			Confirm({
+				title: "确认删除当前信息？",
+				success: deteleItemSuccess,
+			})
+		}
+		/**
 		 * 删除当前项成功回调函数
 		 */
 		const deteleItemSuccess = () => {
@@ -163,25 +172,11 @@ export default {
 		}
 
 		/**
-		 * 编辑/删除展示对话框的事件处理函数
+		 * 编辑当前项
 		 */
-		function showModal(index) {
-			switch (index) {
-				case 0:
-					console.log("删除");
-					deleteConfirm({
-						title: "确认删除当前信息？",
-						success: deteleItemSuccess,
-					});
-					break;
-				case 1:
-					console.log("编辑");
-					editVisible.value = true;
-					break;
-				default:
-					break;
-			}
-		};
+		const editItem = () => {
+			editVisible.value = true;
+		}
 		/**
 		 * 
 		 */
@@ -195,9 +190,11 @@ export default {
       paginationStyle,
 			rowSelection,
 			
-			showModal,
+			// showModal,
 			hideEditModal,
-			deleteAll
+			deleteAll,
+			deleteItem,
+			editItem
     }
 	},
 };
