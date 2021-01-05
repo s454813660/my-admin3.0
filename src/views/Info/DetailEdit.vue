@@ -4,15 +4,20 @@
       <div class="edit-detail-item category">
         <label for="">信息分类：</label>
         <div class="content-wrap">
-          <a-select allowClear placeholder="请选择" style="width: 100%" size="large">
-            <a-select-option value="1">1</a-select-option>
+          <a-select allowClear placeholder="请选择" style="width: 100%"
+                    size="large"
+                    v-model:value="data.categoryId"
+                    >
+            <a-select-option v-for="item in data.category"
+                             :key="item.id"
+                             :value="item.id">{{item.category_name}}</a-select-option>
           </a-select>
         </div>
       </div>
       <div class="edit-detail-item title">
         <label for="">新闻标题：</label>
         <div class="content-wrap">
-          <a-input placeholder="请输入标题" style="height:40px;width:100%"></a-input>
+          <a-input v-model:value="data.title" placeholder="请输入标题" style="height:40px;width:100%"></a-input>
         </div>
       </div>
       <div class="edit-detail-item avatar">
@@ -24,38 +29,63 @@
       <div class="edit-detail-item date">
         <label for="">发布日期：</label>
         <div class="content-wrap">
-          <a-date-picker size="large" style="width: 100%"/>
+          <a-config-provider :locale="locale">
+            <a-date-picker v-model:value="data.date"
+                           valueFormat="YYYY-MM-DD h:mm:ss"
+                           size="large" 
+                           style="width: 100%"
+                           disabled/>
+          </a-config-provider>  
         </div>
       </div>
       <div class="edit-detail-item content">
         <label for="">详细内容：</label>
         <div class="content-wrap">
-          <a-textarea></a-textarea>
+          <RichTxtEditor :content="data.content"
+                         @commitAsync="commitAsync"></RichTxtEditor>
         </div>
       </div>
     </a-form>
   </div>
 </template>
 <script>
-import { useRoute } from "vue-router";
+//国际化配置 中文
+import zhCN from 'ant-design-vue/lib/locale-provider/zh_CN';
+import { useRoute, useRouter } from "vue-router";
 
 import { getList } from "@/network/info";
-import { onMounted, reactive } from 'vue';
+
+//公用分类数据获取
+import { useCateData } from "@/network/common";
+
+import { onMounted, reactive, watch } from 'vue';
+
+import { formatDate } from "@/libs/utils/common"
 
 import Upload from "@/components/common/Upload";
+import RichTxtEditor from '@/components/common/RichTxtEditor';
 export default {
   name: 'DetailEdit',
   components: {
-    Upload
+    Upload,
+    RichTxtEditor
   },
   setup() {
+    const locale = zhCN;
     // 获取当前路由
     const route = useRoute();
+    // 获取路由对象
+    const router = useRouter();
+    const { category_data, GetCategoryAll } = useCateData()
     // data
     const data = reactive({
       id: route.params.id || sessionStorage.getItem("infoId"),
+      category: [],
+      categoryId: undefined,
+      title: "",
+      date: "",
+      content: ""
     })
-    console.log(data);
     // 获取信息方法
     const GetList = (params) => {
 			let reqData = {
@@ -70,13 +100,12 @@ export default {
         pageSize: 10
 			}
 			getList(reqData).then(res => {
-				console.log(res);
-				// key: '1',
-				// title: 'John Brown',
-				// category: "国内信息",
-				// date: "2019-09-10 19:31:31",
-				// admin: '管理员',
-				// let resData = res.data.data;
+        let resData = res.data.data.data[0];
+        console.log(resData);
+        data.categoryId = resData.categoryId;
+        data.title = resData.title;
+        data.date = formatDate(resData.createDate, "Y-M-D h:m:s"),
+        data.content = resData.content
 				// resData.data.forEach(item => {
         //     item.key = item.id;
         //     item.categoryName = formatCategoryName(item.categoryId)
@@ -87,11 +116,26 @@ export default {
 			}).catch(err=> {})
     };
 
+    /**
+     * 自定义事件通信
+     */
+    const commitAsync = (params) => {
+      console.log(params);
+      data.content = params;
+      router.back()
+
+    }
+    watch(() => category_data.list, (val) => {
+      data.category = val;
+    })
     onMounted(() => {
-      // GetList(data)
+      GetCategoryAll();
+      GetList(data)
     })
     return {
-      
+      locale,
+      data,
+      commitAsync
     }
   }
 }
@@ -109,7 +153,7 @@ export default {
     @include labelDom(120, right, 40)
   }
   &.title {
-    width: 455px;
+    width: 60%;
     margin-top: 30px;
     @include labelDom(120, right, 40)
   }
@@ -126,6 +170,7 @@ export default {
   &.content {
     width: 100%;
     margin-top: 36px;
+    text-align: left;
     @include labelDom(120, right, 40);
   }
 }

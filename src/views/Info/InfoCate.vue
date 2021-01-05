@@ -11,7 +11,7 @@
 							:key="firstCateItem.id"
 						>
 							<div class="primary-item">
-								<icon-font class="icon" :type="'icon-minus'"></icon-font>
+								<icon-font class="icon" :type="'icon-minus'" @click="toggleCate"></icon-font>
 								<h4>{{ firstCateItem.category_name }}</h4>
 								<div class="btn-group">
 									<a-button
@@ -224,7 +224,12 @@ export default {
 				first_cate_status.value = false;
 			}
 		};
-
+		/**
+		 * 收起/展开二级分类
+		 */
+		const toggleCate = () => {
+			console.log(1);
+		}
 		/**
 		 * 编辑分类请求
 		 */
@@ -410,7 +415,8 @@ export default {
 			addChild,
 			deleteFirstCate,
 			editSecCate,
-			deleteSecCate
+			deleteSecCate,
+			toggleCate
 		};
 	},
 };

@@ -23,3 +23,14 @@ export function formatDate(number, format) {
 	}
 	return format;
 }
+
+// formatCategoryName 
+export const formatCategoryName = (id) => {
+	let name = ""
+	for(let item in category_data.list) {
+		if(category_data.list[item].id === id) {
+			return category_data.list[item].category_name
+		}
+	}
+	return name
+}
