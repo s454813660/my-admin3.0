@@ -18,7 +18,9 @@
             <!-- <svg-icon class="sub-menu-icon" :icon-class="item.meta.icon"></svg-icon> -->
             <span v-if="item.meta">{{item.meta.title}}</span>
           </template>
-          <a-menu-item v-for="subItem in item.children" :key="subItem.path">{{subItem.meta.title}}</a-menu-item>
+          <template v-for="subItem in item.children">
+            <a-menu-item :key="subItem.path" v-if="!subItem.hidden">{{subItem.meta.title}}</a-menu-item>
+          </template>
         </a-sub-menu>
       </template>
     </a-menu>

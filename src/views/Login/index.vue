@@ -201,7 +201,7 @@ export default {
       console.log(reqData);
       const [err, res] = await awaitWrap(login(reqData));
       
-      console.log(res);
+      // console.log(res);
       let resData = res? res.data : "";
       if(resData) {
         message.success(resData.message);

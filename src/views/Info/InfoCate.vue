@@ -4,10 +4,10 @@
 		<div class="category-wrap">
 			<a-row>
 				<a-col :span="8">
-					<template v-if="category_list.list">
+					<template v-if="category_data.list">
 						<div
 							class="cate-list"
-							v-for="firstCateItem in category_list.list"
+							v-for="firstCateItem in category_data.list"
 							:key="firstCateItem.id"
 						>
 							<div class="primary-item">
@@ -74,6 +74,7 @@
 										size="large"
 										v-model:value="category_form.secCateValue"
 										placeholder="请输入二级分类名称"
+										
 									></a-input>
 								</a-form-item>
 								<a-form-item :wrapper-col="{ offset: 3 }">
@@ -101,19 +102,22 @@ import {
 	deleteCategory,
 	putCategory
 } from "@/network/category";
-// async await捕获错误
-import { awaitWrap } from "@/libs/utils/tools";
 // message弹窗
 import { message } from "ant-design-vue";
+// async await捕获错误
+import { awaitWrap } from "@/libs/utils/tools";
 // comfirm
 import { useConfirm } from "@/libs/utils/useConfirm";
-import { reactive, ref, nextTick, onMounted, } from "vue";
+import { reactive, ref, nextTick, onMounted, watch, } from "vue";
+import { useCateData } from "@/network/common";
 export default {
 	name: "InfoCate",
 	components: {
 		IconFont,
 	},
 	setup() {
+
+		const { category_data, GetCategoryAll } = useCateData()
 		/**
 		 * deletecomfirm
 		 */
@@ -140,9 +144,9 @@ export default {
 		/**
 		 * 分类列表
 		 */
-		const category_list = reactive({
-			list: [],
-		});
+		// const category_data = reactive({
+		// 	list: [],
+		// });
 		/**
 		 * 一级分类input status
 		 */
@@ -216,7 +220,7 @@ export default {
 			let resData = res.data;
 			if (resData.resCode === 0) {
         message.success(resData.message);
-				_getCategoryAll();
+				GetCategoryAll();
 				first_cate_status.value = false;
 			}
 		};
@@ -242,7 +246,7 @@ export default {
 			let resData = res.data;
 			if(resData.resCode === 0) {
 				message.success(resData.message);
-				_getCategoryAll();
+				GetCategoryAll();
 			}
 		}
 		/**
@@ -301,24 +305,15 @@ export default {
 					content: resData.message,
 				});
 				// 更新列表
-				// _getCategoryAll();
-				category_list.list.push(resData.data);
+				// GetCategoryAll();
+				category_data.list.push(resData.data);
 			}
 		};
 
 		/**
 		 * 获取列表信息
 		 */
-		const _getCategoryAll = async () => {
-      const [err, res] = await awaitWrap(getCategoryAll());
-      if(res) {
-        let resData = res.data;
-			  category_list.list = resData.data;
-      }else {
-        category_list.list = [];
-      }
-      // console.log(res);
-		};
+		// const { GetCategoryAll } = useCateData();
 
 		/**
 		 * 编辑方法
@@ -333,7 +328,7 @@ export default {
 				first_cate_status.value = true;
 				sec_cate_status.value = true;
 				secCateIsShow(true);
-        category_list.list.forEach(item => {
+        category_data.list.forEach(item => {
 				if(item.id === cateItem.parent_id){
 						category_form.firstCateValue = item.category_name
 					}
@@ -389,14 +384,14 @@ export default {
       if(res){
         let resData = res.data;
         if(resData.resCode === 0) {message.success(resData.message);};
-        _getCategoryAll();
+        GetCategoryAll();
       }
 		};
 		/**
 		 * mounted
 		 */
 		onMounted(() => {
-			_getCategoryAll();
+			GetCategoryAll();
 		});
 		return {
 			//ref
@@ -405,7 +400,8 @@ export default {
 			sec_cate_status,
 			//reactive
 			category_form,
-			category_list,
+			category_data,
+			editFlag,
 
 			//methods
 			addFirstCate,

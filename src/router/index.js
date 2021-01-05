@@ -62,6 +62,15 @@ const routes = [
           title: "信息分类"
         },
         component: () => import("@/views/Info/InfoCate")
+      },
+      {
+        path: "/admin/detailEdit",
+        name: "DetailEdit",
+        hidden: true,
+        meta: {
+          title: "编辑详情"
+        },
+        component: () => import("@/views/Info/DetailEdit")
       }
     ]
   },
