@@ -4,10 +4,10 @@
 		<div class="category-wrap">
 			<a-row>
 				<a-col :span="8">
-					<template v-if="category_data.list">
+					<template v-if="categoryData.list">
 						<div
 							class="cate-list"
-							v-for="firstCateItem in category_data.list"
+							v-for="firstCateItem in categoryData.list"
 							:key="firstCateItem.id"
 						>
 							<div class="primary-item">
@@ -97,7 +97,6 @@ const IconFont = createFromIconfontCN({
 // 接口
 import {
 	addFirstCategory,
-	getCategoryAll,
 	addChildrenCategory,
 	deleteCategory,
 	putCategory
@@ -108,7 +107,7 @@ import { message } from "ant-design-vue";
 import { awaitWrap } from "@/libs/utils/tools";
 // comfirm
 import { useConfirm } from "@/libs/utils/useConfirm";
-import { reactive, ref, nextTick, onMounted, watch, } from "vue";
+import { reactive, ref, onMounted } from "vue";
 import { useCateData } from "@/network/common";
 export default {
 	name: "InfoCate",
@@ -117,7 +116,7 @@ export default {
 	},
 	setup() {
 
-		const { category_data, GetCategoryAll } = useCateData()
+		const { categoryData, GetCategoryAll } = useCateData()
 		/**
 		 * deletecomfirm
 		 */
@@ -144,7 +143,7 @@ export default {
 		/**
 		 * 分类列表
 		 */
-		// const category_data = reactive({
+		// const categoryData = reactive({
 		// 	list: [],
 		// });
 		/**
@@ -311,7 +310,7 @@ export default {
 				});
 				// 更新列表
 				// GetCategoryAll();
-				category_data.list.push(resData.data);
+				categoryData.list.push(resData.data);
 			}
 		};
 
@@ -333,7 +332,7 @@ export default {
 				first_cate_status.value = true;
 				sec_cate_status.value = true;
 				secCateIsShow(true);
-        category_data.list.forEach(item => {
+        categoryData.list.forEach(item => {
 				if(item.id === cateItem.parent_id){
 						category_form.firstCateValue = item.category_name
 					}
@@ -405,7 +404,7 @@ export default {
 			sec_cate_status,
 			//reactive
 			category_form,
-			category_data,
+			categoryData,
 			editFlag,
 
 			//methods

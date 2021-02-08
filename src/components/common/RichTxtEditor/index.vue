@@ -14,6 +14,11 @@ export default {
       default: ""
     }
   },
+  emits: {
+    commitAsync: payload => {
+      // console.log(payload);
+    }
+  },
   setup(props, ctx) {
     const editor = ref();
     const content = reactive({

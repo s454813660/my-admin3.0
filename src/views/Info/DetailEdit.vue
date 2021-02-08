@@ -76,7 +76,7 @@ export default {
     const route = useRoute();
     // 获取路由对象
     const router = useRouter();
-    const { category_data, GetCategoryAll } = useCateData()
+    const { categoryData, GetCategoryAll } = useCateData()
     // data
     const data = reactive({
       id: route.params.id || sessionStorage.getItem("infoId"),
@@ -125,7 +125,7 @@ export default {
       router.back()
 
     }
-    watch(() => category_data.list, (val) => {
+    watch(() => categoryData.list, (val) => {
       data.category = val;
     })
     onMounted(() => {

@@ -2,7 +2,7 @@
 	<div class="info-list">
 		<!-- list-header start -->
 		<div class="info-header">
-			<a-row :gutter="8">
+			<a-row :gutter="8" type="flex">
 				<!-- category -->
 				<a-col>
 					<div class="category">
@@ -42,17 +42,7 @@
 					<div class="keyword">
 						<label for="">关键字：</label>
 						<div class="content-wrap">
-							<a-select :value="undefined"
-												placeholder="请输入"
-												style="width:100%"
-												size="large">
-								<a-select-option value="1">
-									1
-								</a-select-option>
-								<a-select-option value="2">
-									2
-								</a-select-option>
-							</a-select>
+							<SelectComp :selectOptions="keywordSelectOptions" style="width: 100%"/>
 						</div>
 					</div>
 				</a-col>
@@ -66,8 +56,8 @@
 										@click="searchInfo">搜索</a-button>
 				</a-col>
 				<!-- addEdit -->
-				<a-col>
-					<a-button type="danger" size="large" style="width:98px;font-size: 15px;margin-left:186px"
+				<a-col flex="auto">
+					<a-button type="danger" size="large" class="pull-right"
 										@click="showModal">编辑</a-button>
 				</a-col>
 			</a-row>
@@ -78,10 +68,11 @@
 		<div class="info-table">
 			<a-table :row-selection="rowSelection" 
 							 :columns="columns"
-							 :data-source="info_data.data"
+							 :data-source="infoData.data"
 							 size="middle"
 							 bordered
-							 :pagination="false">
+							 :pagination="false"
+							 :loading="loading">
 				<template #newstitle="{ text }">
 					<span>{{ text }}</span>
 				</template>
@@ -109,13 +100,14 @@
 		<!-- table end -->
 		<infoEdit :modalVisible="modalVisible"
 							@hideModal="hideModal"
-							:category="category_data"
+							:category="categoryData"
 							:currentItem="currentItem"
 							@commit="GetList"
 							:editFlag="editFlag" />
 	</div>
 </template>
 <script>
+import SelectComp from "@/components/common/Select"
 import { reactive, ref, computed, onMounted, watch, toRefs } from "vue";
 //国际化配置 中文
 import zhCN from 'ant-design-vue/lib/locale-provider/zh_CN';
@@ -135,14 +127,26 @@ import { useRouter } from "vue-router";
 export default {
 	name: "InfoList",
 	components: {
-		infoEdit
+		infoEdit,
+		SelectComp
 	},
 	setup() {
+		const keywordSelectOptions = reactive({
+      value: undefined,
+      options: [
+        { type: "title", label: "标题"},
+        { type: "manager", label: "管理员"},
+      ],
+      allowClear: true,
+      size: "large",
+      placeholder: "请输入"
+    });
 		// router
 		const router = useRouter();
 		console.log(router);
 		//data
 		const data = reactive({
+			loading: true,
 			categoryId: undefined,
 			date: [],
 			modalVisible: false,
@@ -150,7 +154,7 @@ export default {
 			currentItem: {},
 			editFlag: ""
 		})
-		const { category_data, GetCategoryAll } = useCateData()
+		const { categoryData, GetCategoryAll } = useCateData()
 
 		const { Confirm } = useConfirm();
 		//locale
@@ -216,7 +220,7 @@ export default {
 		/**
 		 * table data
 		 */
-		const info_data = reactive({
+		const infoData = reactive({
 			data: []
 		});
 
@@ -226,9 +230,9 @@ export default {
 		// formatCategoryName 
 		const formatCategoryName = (id) => {
 			let name = ""
-			for(let item in category_data.list) {
-				if(category_data.list[item].id === id) {
-					return category_data.list[item].category_name
+			for(let item in categoryData.list) {
+				if(categoryData.list[item].id === id) {
+					return categoryData.list[item].category_name
 				}
 			}
 			return name
@@ -239,7 +243,7 @@ export default {
 		/* header event */
 		// search
 		const searchInfo = () => {
-			let params = {
+			let data = {
 				categoryId: data.categoryId,
 				startTiem: data.date[0],
 				endTime: data.date[1],
@@ -248,8 +252,7 @@ export default {
 				pageNumber: paginationOptions.current,
 				pageSize: paginationOptions.pageSize
 			}
-			console.log(params);
-			GetList(params)
+			GetList({data})
 		}
 		// addEdit
 		const showModal = () => {
@@ -293,36 +296,36 @@ export default {
 			data.modalVisible = false;
 		}
 		//watch
-		watch(() => category_data.list, () => {
-			data.category = category_data.list
+		watch(() => categoryData.list, () => {
+			data.category = categoryData.list
 		})
 
 		// getData
 		const GetList = (params) => {
 			let reqData = {
-				categoryId: params? params.categoryId : "",
-				startTiem: params? params.startTiem : "",
-				endTime: params? params.endTime : "",
-				title: params? params.title : "",
-				id: params? params.id : "",
+				categoryId: params? params.data.categoryId : "",
+				startTiem: params? params.data.startTiem : "",
+				endTime: params? params.data.endTime : "",
+				title: params? params.data.title : "",
+				id: params? params.data.id : "",
 				pageNumber: paginationOptions.current,
 				pageSize: paginationOptions.pageSize
 			}
-			getList(reqData).then(res => {
-				console.log(res);
-				// key: '1',
-				// title: 'John Brown',
-				// category: "国内信息",
-				// date: "2019-09-10 19:31:31",
-				// admin: '管理员',
+			params = {
+				method: "post",
+				url: "/news/getList/",
+				data: reqData
+			}
+			getList(params).then(res => {
 				let resData = res.data.data;
 				resData.data.forEach(item => {
 					item.key = item.id;
 					item.categoryName = formatCategoryName(item.categoryId)
 					item.createDate = formatDate(item.createDate*1, "Y-M-D h:m:s")
 				});
-			info_data.data = resData.data;
+			infoData.data = resData.data;
 			paginationOptions.total = resData.total;
+			data.loading = false;
 			}).catch(err=> {})
 		}
 		//
@@ -344,15 +347,16 @@ export default {
 			GetList()
 		})
 		return {
+			keywordSelectOptions,
 			//本地话配置
 			locale,
 			//table 配置
 			rowSelection, columns, paginationOptions,
 			//table data
-			info_data,
+			infoData,
 			//data
 			...toRefs(data),
-			category_data,
+			categoryData,
 			//bindEvent
 			searchInfo, showModal, hideModal, editItem, deleteItem, editDetail,
 			GetList

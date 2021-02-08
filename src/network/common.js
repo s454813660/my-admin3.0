@@ -3,18 +3,18 @@ import { getCategoryAll } from "@/network/category";
 import { awaitWrap } from "@/libs/utils/tools";
 import { reactive } from "vue";
 export function useCateData() {
-  const category_data = reactive({
+  const categoryData = reactive({
     list: []
   });
   const GetCategoryAll = async () => {
     let [err, res] = await awaitWrap(getCategoryAll());
     // console.log(res);
     let resData = res.data.data;
-    category_data.list = resData;
-    // console.log(category_data.list);
+    categoryData.list = resData;
+    // console.log(categoryData.list);
   };
   return {
-    category_data,
+    categoryData,
     GetCategoryAll,
   }
 }

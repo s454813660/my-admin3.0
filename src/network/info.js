@@ -33,10 +33,10 @@ export function editInfo(data) {
 /**
  * 获取信息列表
  */
-export function getList(data) {
+export function getList(params) {
   return request({
-    url: "/news/getList/",
-    method: "post",
-    data
+    url: params.url,
+    method: params.method,
+    data: params.data
   })
 }

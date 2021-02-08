@@ -83,7 +83,7 @@ export default {
       {txt: "注册", model: "register"}
       ]);
     // 登录/注册按钮状态
-    const loginBtnStatus = ref(false);
+    const loginBtnStatus = ref(true);
     // 获取验证码按钮状态
     const captchaBtnStatus = reactive({
       status: false,
