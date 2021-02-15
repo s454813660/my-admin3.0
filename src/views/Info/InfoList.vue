@@ -116,7 +116,7 @@ import { useCateData } from "@/network/common";
 //api
 import { getList, deleteInfo } from "@/network/info";
 //引入编辑对话框组件
-import infoEdit from "./listComps/infoEdit";
+import infoEdit from "./listComps/InfoEdit";
 // format
 import { formatDate } from "@/libs/utils/common"
 //useComfirm

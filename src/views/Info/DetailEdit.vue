@@ -99,7 +99,12 @@ export default {
         pageNumber: 1,
         pageSize: 10
 			}
-			getList(reqData).then(res => {
+      params = {
+				method: "post",
+				url: "/news/getList/",
+				data: reqData
+			}
+			getList(params).then(res => {
         let resData = res.data.data.data[0];
         console.log(resData);
         data.categoryId = resData.categoryId;
@@ -123,7 +128,6 @@ export default {
       console.log(params);
       data.content = params;
       router.back()
-
     }
     watch(() => categoryData.list, (val) => {
       data.category = val;

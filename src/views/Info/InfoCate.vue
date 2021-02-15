@@ -57,7 +57,7 @@
 						<div class="form">
 							<a-form
 								:model="category_form"
-								:label-col="{ span: 3 }"
+								:label-col="{ span: 4 }"
 								label-align="left"
 								ref="categoryForm"
 								v-if="first_cate_status"
