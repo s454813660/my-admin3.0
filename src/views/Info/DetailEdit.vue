@@ -1,51 +1,54 @@
 <template> 
   <div id="edit-detail">
-    <a-form>
-      <div class="edit-detail-item category">
-        <label for="">信息分类：</label>
-        <div class="content-wrap">
-          <a-select allowClear placeholder="请选择" style="width: 100%"
-                    size="large"
-                    v-model:value="data.categoryId"
-                    >
-            <a-select-option v-for="item in data.category"
-                             :key="item.id"
-                             :value="item.id">{{item.category_name}}</a-select-option>
-          </a-select>
+    <a-spin :spinning="data.loading" >
+      <a-form>
+        <div class="edit-detail-item category">
+          <label for="">信息分类：</label>
+          <div class="content-wrap">
+            <a-select allowClear placeholder="请选择" style="width: 100%"
+                      size="large"
+                      v-model:value="data.categoryId"
+                      >
+              <a-select-option v-for="item in data.category"
+                              :key="item.id"
+                              :value="item.id">{{item.category_name}}</a-select-option>
+            </a-select>
+          </div>
         </div>
-      </div>
-      <div class="edit-detail-item title">
-        <label for="">新闻标题：</label>
-        <div class="content-wrap">
-          <a-input v-model:value="data.title" placeholder="请输入标题" style="height:40px;width:100%"></a-input>
+        <div class="edit-detail-item title">
+          <label for="">新闻标题：</label>
+          <div class="content-wrap">
+            <a-input v-model:value="data.title" placeholder="请输入标题" style="height:40px;width:100%"></a-input>
+          </div>
         </div>
-      </div>
-      <div class="edit-detail-item avatar">
-        <label for="">缩略图：</label>
-        <div class="content-wrap">
-          <Upload />
+        <div class="edit-detail-item avatar">
+          <label for="">缩略图：</label>
+          <div class="content-wrap">
+            <Upload />
+          </div>
         </div>
-      </div>
-      <div class="edit-detail-item date">
-        <label for="">发布日期：</label>
-        <div class="content-wrap">
-          <a-config-provider :locale="locale">
-            <a-date-picker v-model:value="data.date"
-                           valueFormat="YYYY-MM-DD h:mm:ss"
-                           size="large" 
-                           style="width: 100%"
-                           disabled/>
-          </a-config-provider>  
+        <div class="edit-detail-item date">
+          <label for="">发布日期：</label>
+          <div class="content-wrap">
+            <a-config-provider :locale="locale">
+              <a-date-picker v-model:value="data.date"
+                            valueFormat="YYYY-MM-DD h:mm:ss"
+                            size="large" 
+                            style="width: 100%"
+                            disabled/>
+            </a-config-provider>  
+          </div>
         </div>
-      </div>
-      <div class="edit-detail-item content">
-        <label for="">详细内容：</label>
-        <div class="content-wrap">
-          <RichTxtEditor :content="data.content"
-                         @commitAsync="commitAsync"></RichTxtEditor>
+        <div class="edit-detail-item content">
+          <label for="">详细内容：</label>
+          <div class="content-wrap">
+            <RichTxtEditor :content="data.content"
+                          @commitAsync="commitAsync"
+                          @backInfoList="backInfoList"></RichTxtEditor>
+          </div>
         </div>
-      </div>
-    </a-form>
+      </a-form>
+    </a-spin>
   </div>
 </template>
 <script>
@@ -53,7 +56,11 @@
 import zhCN from 'ant-design-vue/lib/locale-provider/zh_CN';
 import { useRoute, useRouter } from "vue-router";
 
-import { getList } from "@/network/info";
+import { getList, editInfo } from "@/network/info";
+
+import { useConfirm } from "@/libs/utils/useConfirm";
+
+import { message } from "ant-design-vue";
 
 //公用分类数据获取
 import { useCateData } from "@/network/common";
@@ -70,7 +77,9 @@ export default {
     Upload,
     RichTxtEditor
   },
-  setup() {
+  setup(props, ctx) {
+    const { Confirm } = useConfirm();
+
     const locale = zhCN;
     // 获取当前路由
     const route = useRoute();
@@ -84,7 +93,8 @@ export default {
       categoryId: undefined,
       title: "",
       date: "",
-      content: ""
+      content: "",
+      loading: true
     })
     // 获取信息方法
     const GetList = (params) => {
@@ -99,13 +109,18 @@ export default {
         pageNumber: 1,
         pageSize: 10
 			}
-			getList(reqData).then(res => {
+      let reqParams = {
+        url: "/news/getList/",
+        method: "post",
+        data: reqData
+      }
+			getList(reqParams).then(res => {
         let resData = res.data.data.data[0];
-        console.log(resData);
         data.categoryId = resData.categoryId;
         data.title = resData.title;
         data.date = formatDate(resData.createDate, "Y-M-D h:m:s"),
-        data.content = resData.content
+        data.content = resData.content;
+        data.loading = false;
 				// resData.data.forEach(item => {
         //     item.key = item.id;
         //     item.categoryName = formatCategoryName(item.categoryId)
@@ -115,15 +130,45 @@ export default {
         // paginationOptions.total = resData.total;
 			}).catch(err=> {})
     };
+    /**
+     * 修改
+     */
+    const PutInfo = () => {
+      let reqData = {
+        id: data.id,
+        categoryId: data.categoryId,
+        title: data.title,
+        imgUrl: "",
+        updateDate: "",
+        content: data.content,
+      };
+      editInfo(reqData).then(res => {
+        let resData = res.data;
+        if(resData.resCode === 0) {
+          message.success(resData.message);
+          ctx.emit("commit");
+          router.back()
+        }
+      })
+    }
 
     /**
      * 自定义事件通信
+     * 提交修改
      */
     const commitAsync = (params) => {
-      console.log(params);
       data.content = params;
-      router.back()
-
+      Confirm({
+        title: "确认修改吗？",
+        success: PutInfo
+      })
+    }
+    /**
+     * 自定义事件通信
+     * 返回信息列表
+     */
+    const backInfoList = () => {
+      router.back();
     }
     watch(() => categoryData.list, (val) => {
       data.category = val;
@@ -135,7 +180,8 @@ export default {
     return {
       locale,
       data,
-      commitAsync
+      commitAsync,
+      backInfoList
     }
   }
 }

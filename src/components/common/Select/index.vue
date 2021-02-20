@@ -20,7 +20,7 @@ export default {
       default: () => {}
     }
   },
-  setup(props) {
+  setup(props, ctx) {
     const selectOptions = reactive({
       value: "",
       options: [],
@@ -35,13 +35,15 @@ export default {
         }
       }
     }
-
+    /**
+     * 改变值事件处理函数
+     */
     onBeforeMount(() => {
       initOption()
     });
 
     return {
-      selectOptions
+      selectOptions,
     }
   }
 }

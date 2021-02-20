@@ -42,13 +42,17 @@
 					<div class="keyword">
 						<label for="">关键字：</label>
 						<div class="content-wrap">
-							<SelectComp :selectOptions="keywordSelectOptions" style="width: 100%"/>
+							<SelectComp :selectOptions="keywordSelectOptions"
+													style="width: 100%"
+													/>
 						</div>
 					</div>
 				</a-col>
 				<!-- select input -->
 				<a-col>
-					<a-input size="large" style="width:180px;height: 40px; font-size:16px" placeholder="请输入内容"></a-input>
+					<a-input size="large" style="width:180px;height: 40px; font-size:16px" 
+									 placeholder="请输入内容"
+									 v-model:value="title"></a-input>
 				</a-col>
 				<!-- search button -->
 				<a-col>
@@ -86,7 +90,7 @@
 			</a-table>
 			<div class="table-footer">
 				<div class="delete-all">
-					<a-button>删除所有</a-button>
+					<a-button @click="deleteAll">删除所有</a-button>
 				</div>
 				<div class="pagination">
 					<a-pagination v-model:current="paginationOptions.current"
@@ -108,7 +112,7 @@
 </template>
 <script>
 import SelectComp from "@/components/common/Select"
-import { reactive, ref, computed, onMounted, watch, toRefs } from "vue";
+import { reactive, onMounted, watch, toRefs } from "vue";
 //国际化配置 中文
 import zhCN from 'ant-design-vue/lib/locale-provider/zh_CN';
 //公用分类数据获取
@@ -143,7 +147,6 @@ export default {
     });
 		// router
 		const router = useRouter();
-		console.log(router);
 		//data
 		const data = reactive({
 			loading: true,
@@ -152,7 +155,10 @@ export default {
 			modalVisible: false,
 			category: [],
 			currentItem: {},
-			editFlag: ""
+			editFlag: "",
+			title: "",
+			id: "",
+			infoChoosen: []
 		})
 		const { categoryData, GetCategoryAll } = useCateData()
 
@@ -203,7 +209,10 @@ export default {
 		 * table selection
 		 */
 		const rowSelection = reactive({
-			columnWidth: 45
+			columnWidth: 45,
+			onChange(val){
+				data.infoChoosen = val;
+			}
 		})
 		/**
 		 * table paginationOptions
@@ -229,13 +238,11 @@ export default {
 		 */
 		// formatCategoryName 
 		const formatCategoryName = (id) => {
-			let name = ""
 			for(let item in categoryData.list) {
 				if(categoryData.list[item].id === id) {
 					return categoryData.list[item].category_name
 				}
 			}
-			return name
 		}
 		/**
 		 * bindEvent 
@@ -243,7 +250,7 @@ export default {
 		/* header event */
 		// search
 		const searchInfo = () => {
-			let data = {
+			let reqData = {
 				categoryId: data.categoryId,
 				startTiem: data.date[0],
 				endTime: data.date[1],
@@ -252,7 +259,7 @@ export default {
 				pageNumber: paginationOptions.current,
 				pageSize: paginationOptions.pageSize
 			}
-			GetList({data})
+			GetList({data:reqData})
 		}
 		// addEdit
 		const showModal = () => {
@@ -267,8 +274,7 @@ export default {
 		 * deleteItem 删除当前选项
 		 */
 		const deleteItem = (record) => {
-			console.log(record);
-			data.currentItem = record;
+			data.infoChoosen = [record.id]
 			Confirm({
 				title: "是否删除当前项",
 				success: DeteleInfo
@@ -291,6 +297,16 @@ export default {
 				params: { id }
 			})
 		}
+
+		/**
+		 * 删除所有
+		 */
+		const deleteAll = () => {
+			Confirm({
+				title: "是否删除所有？",
+				success: DeteleInfo
+			})
+		}
 		/* customize event (自定义事件) */ 
 		const hideModal = () => {
 			data.modalVisible = false;
@@ -302,6 +318,7 @@ export default {
 
 		// getData
 		const GetList = (params) => {
+			data.loading = true;
 			let reqData = {
 				categoryId: params? params.data.categoryId : "",
 				startTiem: params? params.data.startTiem : "",
@@ -328,12 +345,11 @@ export default {
 			data.loading = false;
 			}).catch(err=> {})
 		}
-		//
+		/**
+		 * 确认删除回调
+		 */
 		const DeteleInfo = () => {
-			let reqData = {
-				id: [data.currentItem.id]
-			};
-			deleteInfo(reqData).then(res => {
+			deleteInfo({id: data.infoChoosen}).then(res => {
 				let resData = res.data;
 				if(resData.resCode === 0) {
 					message.success(resData.message);
@@ -358,8 +374,8 @@ export default {
 			...toRefs(data),
 			categoryData,
 			//bindEvent
-			searchInfo, showModal, hideModal, editItem, deleteItem, editDetail,
-			GetList
+			searchInfo, showModal, hideModal, editItem, deleteItem, editDetail, deleteAll,
+			GetList,
 		}
 	}
 };

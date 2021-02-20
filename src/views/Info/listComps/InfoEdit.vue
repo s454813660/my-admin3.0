@@ -167,7 +167,7 @@ export default {
         let resData = res.data;
         if(resData.resCode === 0) {
           message.success(resData.message);
-          ctx.emit("commit")
+          ctx.emit("commit");
           cancel();
         }
       })

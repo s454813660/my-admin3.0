@@ -39,10 +39,9 @@
 // 引入组件
 // import Table from "ant-design-vue/lib/table";
 // import "ant-design-vue/lib/table/style/index";
-
 import { onBeforeMount, reactive } from "vue";
-
-import { useInfoData } from "@/network/useInfoData";
+import { useUserData } from "@/network/useUserData";
+import api from "@/network/api";
 export default {
 	name: "Table",
 	// components: { Table },
@@ -53,9 +52,7 @@ export default {
 		},
 	},
 	setup(props) {
-		console.log(props);
-
-		const { infoData, GetList } = useInfoData();
+		const { userData:tableData, GetUserList } = useUserData();
 		const tableOptions = reactive({
 			rowSelection: {},
 			columns: [],
@@ -103,15 +100,27 @@ export default {
 					role: "王五",
 				},
 			],
-
 		});
-
+		const getTableData = () => {
+			let requestOptions = tableOptions.requestOptions
+			// console.log(requestOptions);
+			const params = {
+				url: api[requestOptions.requestUrl],
+				method: "post",
+				data: requestOptions.data
+			}
+			// console.log(params);
+			// GetUserList(params);
+		}
+		
 		onBeforeMount(() => {
 			initTableOptions();
+			getTableData()
 		});
 		return {
 			tableOptions,
 			data,
+			tableData
 		};
 	},
 };

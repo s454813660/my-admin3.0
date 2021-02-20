@@ -20,13 +20,13 @@
 			</a-col>
 			<a-col flex="auto">
 				<a-button type="danger" size="large" style="float:right;width: 98px"
-					>新增</a-button
+									@click="openModal">添加用户</a-button
 				>
 			</a-col>
 		</a-row>
 		<TableComp class="user-table" :tableOptions="tableOptions">
       <template #allowed>
-        <a-switch></a-switch>
+        <a-switch @change="isBanned"></a-switch>
       </template>
       <template #action="{record}">
         <div class="btn-group">
@@ -35,20 +35,25 @@
         </div>
       </template>
     </TableComp>
+		<UserEdit :isModalShow="data.isModalShow"
+							@closeEdit="closeEdit" />
 	</div>
 </template>
 <script>
 // 引入组件
 import SelectComp from "@/components/common/Select";
 import TableComp from "@/components/common/Table";
-import { reactive } from "vue";
+import UserEdit from "./comps/UserEdit"
+import { onBeforeMount, reactive } from "vue";
 export default {
 	name: "User",
 	components: {
 		SelectComp,
 		TableComp,
+		UserEdit
 	},
 	setup() {
+		
 		// 选择框配置
 		const selectOptions = reactive({
 			value: undefined,
@@ -111,24 +116,73 @@ export default {
       rowSelection: {
         columnWidth: 45,
       },
-      requestOptions: {
-        url: "/news/getList/",
-        method: "post",
-      }
+			requestOptions: {
+				requestUrl: "getUserList",
+				data: {
+					pageNumber: 1,
+					pageSize: 10
+				}
+			}
     });
     
 		const data = reactive({
       searchValue: "",
+			status: "",
+			isModalShow: false,
+			userFormData: {}
 		});
 
+		/**
+		 * 禁/启用事件处理函数
+		 */
+		const isBanned = (status) => {
+			switch(status) {
+				case true:
+					data.status = 2;
+					break;
+				case false:
+					data.status = 1;
+					break;
+				default:
+					break;
+			}
+			// console.log(data.status);
+		}
+ 		/**
+		 * 删除当前项事件处理函数
+		 */
     const deleteItem = (record) => {
       console.log(record);
     }
+		/**
+		 * openModal 打开对话框事件处理函数
+		 */
+		const openModal = () => {
+			data.isModalShow = true;
+		}
+		/**
+		 * 接受自定义事件
+		 */
+		/**
+		 * closeModal 关闭对话框
+		 */
+		const closeEdit = (val) => {
+			data.isModalShow = val
+		}
+		onBeforeMount(() => {
+			// GetUserList({
+			// 	pageNumber: 1,
+			// 	pageSize: 10
+			// })
+		})
 		return {
       selectOptions,
       tableOptions,
       data,
-      deleteItem
+      deleteItem,
+			isBanned,
+			openModal,
+			closeEdit
 		};
 	},
 };

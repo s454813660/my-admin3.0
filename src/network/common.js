@@ -12,6 +12,7 @@ export function useCateData() {
     let resData = res.data.data;
     categoryData.list = resData;
     // console.log(categoryData.list);
+    return Promise.resolve();
   };
   return {
     categoryData,

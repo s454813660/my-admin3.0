@@ -1,91 +1,107 @@
 <template>
 	<div id="category">
-		<a-button type="danger" @click="addFirstCate">添加一级分类</a-button>
-		<div class="category-wrap">
-			<a-row>
-				<a-col :span="8">
-					<template v-if="categoryData.list">
-						<div
-							class="cate-list"
-							v-for="firstCateItem in categoryData.list"
-							:key="firstCateItem.id"
-						>
-							<div class="primary-item">
-								<icon-font class="icon" :type="'icon-minus'" @click="toggleCate"></icon-font>
-								<h4>{{ firstCateItem.category_name }}</h4>
-								<div class="btn-group">
-									<a-button
-										size="small"
-										shape="round"
-										type="danger"
-										@click="editFirstCate(firstCateItem)"
-										>编辑</a-button
-									>
-									<a-button
-										size="small"
-										shape="round"
-										type="primary"
-										@click="addChild(firstCateItem)"
-										>添加子级</a-button
-									>
-									<a-button
-										size="small"
-										shape="round"
-										@click="deleteFirstCate(firstCateItem)"
-										>删除</a-button
-									>
-								</div>
-							</div>
-							<ul v-if="firstCateItem.children">
-								<li v-for="secCateItem in firstCateItem.children" :key="secCateItem.id">
-									{{ secCateItem.category_name }}
-									<div class="btn-group">
-										<a-button size="small" shape="round" type="danger"
-															@click="editSecCate(secCateItem)">编辑</a-button
-										>
-										<a-button size="small" shape="round"
-															@click="deleteSecCate(secCateItem)">删除</a-button>
-									</div>
-								</li>
-							</ul>
-						</div>
-					</template>
-				</a-col>
-				<a-col :span="15" :offset="1">
-					<div class="primary-item-edit">
-						<h4>一级分类编辑</h4>
-						<div class="form">
-							<a-form
-								:model="category_form"
-								:label-col="{ span: 3 }"
-								label-align="left"
-								ref="categoryForm"
-								v-if="first_cate_status"
+		<a-spin :spinning="loading">
+			<a-button type="danger" @click="addFirstCate">添加一级分类</a-button>
+			<div class="category-wrap">
+				<a-row>
+					<a-col :span="8">
+						<template v-if="categoryData.list">
+							<div
+								class="cate-list"
+								v-for="firstCateItem in categoryData.list"
+								:key="firstCateItem.id"
 							>
-								<a-form-item label="一级分类名称" v-if="first_cate_status">
-									<a-input
-										size="large"
-										v-model:value="category_form.firstCateValue"
-										placeholder="请输入一级分类名称"
-									></a-input>
-								</a-form-item>
-								<a-form-item label="二级分类名称" v-if="sec_cate_status">
-									<a-input
-										size="large"
-										v-model:value="category_form.secCateValue"
-										placeholder="请输入二级分类名称"
-										
-									></a-input>
-								</a-form-item>
-								<a-form-item :wrapper-col="{ offset: 3 }">
-									<a-button type="danger" @click="submitCate">确定</a-button>
-								</a-form-item>
-							</a-form>
+								<div class="primary-item">
+									<icon-font
+										class="icon"
+										:type="'icon-minus'"
+										@click="toggleCate"
+									></icon-font>
+									<h4>{{ firstCateItem.category_name }}</h4>
+									<div class="btn-group">
+										<a-button
+											size="small"
+											shape="round"
+											type="danger"
+											@click="editFirstCate(firstCateItem)"
+											>编辑</a-button
+										>
+										<a-button
+											size="small"
+											shape="round"
+											type="primary"
+											@click="addChild(firstCateItem)"
+											>添加子级</a-button
+										>
+										<a-button
+											size="small"
+											shape="round"
+											@click="deleteFirstCate(firstCateItem)"
+											>删除</a-button
+										>
+									</div>
+								</div>
+								<ul v-if="firstCateItem.children">
+									<li
+										v-for="secCateItem in firstCateItem.children"
+										:key="secCateItem.id"
+									>
+										{{ secCateItem.category_name }}
+										<div class="btn-group">
+											<a-button
+												size="small"
+												shape="round"
+												type="danger"
+												@click="editSecCate(secCateItem)"
+												>编辑</a-button
+											>
+											<a-button
+												size="small"
+												shape="round"
+												@click="deleteSecCate(secCateItem)"
+												>删除</a-button
+											>
+										</div>
+									</li>
+								</ul>
+							</div>
+						</template>
+					</a-col>
+					<a-col :span="15" :offset="1">
+						<div class="primary-item-edit">
+							<h4>一级分类编辑</h4>
+							<div class="form">
+								<a-form
+									:model="categoryFormValue"
+									:label-col="{ span: 3 }"
+									label-align="left"
+									ref="categoryForm"
+									v-if="first_cate_status"
+								>
+									<a-form-item label="一级分类名称" v-if="first_cate_status">
+										<a-input
+											size="large"
+											v-model:value="categoryFormValue.firstCateValue"
+											placeholder="请输入一级分类名称"
+										></a-input>
+									</a-form-item>
+									<a-form-item label="二级分类名称" v-if="sec_cate_status">
+										<a-input
+											size="large"
+											v-model:value="categoryFormValue.secCateValue"
+											placeholder="请输入二级分类名称"
+										></a-input>
+									</a-form-item>
+									<a-form-item :wrapper-col="{ offset: 3 }">
+										<a-button type="danger" @click="submitCate">确定</a-button>
+									</a-form-item>
+								</a-form>
+							</div>
 						</div>
-					</div>
-				</a-col>
-			</a-row>
-		</div>
+					</a-col>
+				</a-row>
+			</div>
+		</a-spin>
 	</div>
 </template>
 <script>
@@ -99,7 +115,7 @@ import {
 	addFirstCategory,
 	addChildrenCategory,
 	deleteCategory,
-	putCategory
+	putCategory,
 } from "@/network/category";
 // message弹窗
 import { message } from "ant-design-vue";
@@ -115,8 +131,7 @@ export default {
 		IconFont,
 	},
 	setup() {
-
-		const { categoryData, GetCategoryAll } = useCateData()
+		const { categoryData, GetCategoryAll } = useCateData();
 		/**
 		 * deletecomfirm
 		 */
@@ -129,10 +144,14 @@ export default {
 		/**
 		 * 分类表单数据绑定
 		 */
-		const category_form = reactive({
+		const categoryFormValue = reactive({
 			firstCateValue: "",
 			secCateValue: "",
 		});
+		/**
+		 * 加载状态
+		 */
+		const loading = ref(true);
 		/**
 		 * 记录编辑状态
 		 */
@@ -155,12 +174,12 @@ export default {
 		 */
 		const sec_cate_status = ref(false);
 
-    /**
-     * 记录当前分类cu	rrentCate
-     */
-    const currentCate = reactive({
-      item: {}
-    })
+		/**
+		 * 记录当前分类cu	rrentCate
+		 */
+		const currentCate = reactive({
+			item: {},
+		});
 		/**
 		 * 二级分类input 状态变化函数
 		 */
@@ -180,9 +199,9 @@ export default {
 		const addFirstCate = () => {
 			first_cate_status.value = true;
 			resetForm({
-        firstCateValue: "",
-        secCateValue: ""
-      });
+				firstCateValue: "",
+				secCateValue: "",
+			});
 			editStatusChange({ first: false });
 			secCateIsShow(false);
 		};
@@ -195,8 +214,8 @@ export default {
 			// console.log(currentCate.item);
 			Confirm({
 				title: `确认删除分类"${currentCate.item.category_name}"吗？`,
-				success: _deleteCategory
-			})	
+				success: _deleteCategory,
+			});
 		};
 		/**
 		 * 删除二级分类事件处理函数
@@ -205,9 +224,9 @@ export default {
 			currentCate.item = secCateItem;
 			Confirm({
 				title: `确认删除分类"${currentCate.item.category_name}"吗？`,
-				success: _deleteCategory
-			})
-		}
+				success: _deleteCategory,
+			});
+		};
 		/**
 		 * 删除分类请求
 		 */
@@ -218,7 +237,7 @@ export default {
 			const [err, res] = await awaitWrap(deleteCategory(reqData));
 			let resData = res.data;
 			if (resData.resCode === 0) {
-        message.success(resData.message);
+				message.success(resData.message);
 				GetCategoryAll();
 				first_cate_status.value = false;
 			}
@@ -228,79 +247,79 @@ export default {
 		 */
 		const toggleCate = () => {
 			console.log(1);
-		}
+		};
 		/**
 		 * 编辑分类请求
 		 */
 		const _putCategory = async () => {
 			let reqData;
-			if(!editFlag.second) {
+			if (!editFlag.second) {
 				reqData = {
 					id: currentCate.item.id,
-					categoryName: category_form.firstCateValue
+					categoryName: categoryFormValue.firstCateValue,
 				};
-			}else {
+			} else {
 				reqData = {
 					id: currentCate.item.id,
-					categoryName: category_form.secCateValue
+					categoryName: categoryFormValue.secCateValue,
 				};
 			}
 			const [err, res] = await awaitWrap(putCategory(reqData));
 			console.log(res);
 			let resData = res.data;
-			if(resData.resCode === 0) {
+			if (resData.resCode === 0) {
 				message.success(resData.message);
 				GetCategoryAll();
 			}
-		}
+		};
 		/**
 		 * 清空表单
 		 */
 		const resetForm = (options) => {
-			category_form.firstCateValue = options.firstCateValue;
-			category_form.secCateValue = options.secCateValue;
+			categoryFormValue.firstCateValue = options.firstCateValue;
+			categoryFormValue.secCateValue = options.secCateValue;
 		};
 		/**
 		 * 提交分类编辑表单事件处理函数
 		 */
 		const submitCate = () => {
-			// console.log("submit",category_form.firstCateValue);
+			// console.log("submit",categoryFormValue.firstCateValue);
 			if (editFlag.first) {
 				//  编辑状态
-				if(!editFlag.second){
+				if (!editFlag.second) {
 					Confirm({
 						title: `确认修改分类"${currentCate.item.category_name}？"`,
-						success: _putCategory
-					})				
-				}else{
+						success: _putCategory,
+					});
+				} else {
 					Confirm({
 						title: `确认修改分类"${currentCate.item.category_name}？"`,
-						success: _putCategory
-					})
-				}	
+						success: _putCategory,
+					});
+				}
 			} else {
 				if (editFlag.second) {
-          _addChildrenCategory(currentCate.item);
-          resetForm({
-            firstCateValue:category_form.firstCateValue,
-            secCateValue: ""
-          });
+					AddChildrenCategory(currentCate.item);
+					resetForm({
+						firstCateValue: categoryFormValue.firstCateValue,
+						secCateValue: "",
+					});
 					return false;
 				}
 				console.log("提交一级分类");
-				_addFirstCategory();
+				AddFirstCategory();
 				resetForm({
-          firstCateValue: "",
-          secCateValue: ""
-        });
+					firstCateValue: "",
+					secCateValue: "",
+				});
 			}
 		};
 		/**
 		 * 提交一级分类数据请求
 		 */
-		const _addFirstCategory = async () => {
+		const AddFirstCategory = async () => {
 			const [err, res] = await awaitWrap(
-				addFirstCategory({ categoryName: category_form.firstCateValue })
+				addFirstCategory({ categoryName: categoryFormValue.firstCateValue })
 			);
 			console.log(res);
 			let resData = res.data;
@@ -324,22 +343,22 @@ export default {
 		 */
 		const edit = (cateItem) => {
 			currentCate.item = cateItem;
-			if(editFlag.first && !editFlag.second){
+			if (editFlag.first && !editFlag.second) {
 				first_cate_status.value = true;
-				category_form.firstCateValue = cateItem.category_name;
+				categoryFormValue.firstCateValue = cateItem.category_name;
 				secCateIsShow(false);
-			}else{
+			} else {
 				first_cate_status.value = true;
 				sec_cate_status.value = true;
 				secCateIsShow(true);
-        categoryData.list.forEach(item => {
-				if(item.id === cateItem.parent_id){
-						category_form.firstCateValue = item.category_name
+				categoryData.list.forEach((item) => {
+					if (item.id === cateItem.parent_id) {
+						categoryFormValue.firstCateValue = item.category_name;
 					}
 				});
-				category_form.secCateValue = cateItem.category_name;
+				categoryFormValue.secCateValue = cateItem.category_name;
 			}
-		}
+		};
 		/**
 		 * 一级分类编辑事件处理函数
 		 */
@@ -359,51 +378,54 @@ export default {
 				second: true,
 			});
 			edit(secCateItem);
-		}
+		};
 		/**
 		 * 添加子级事件处理函数
 		 */
 		const addChild = (firstCateItem) => {
-      currentCate.item = firstCateItem;
-      console.log(currentCate);
+			currentCate.item = firstCateItem;
+			console.log(currentCate);
 			first_cate_status.value = true;
-			category_form.firstCateValue = firstCateItem.category_name;
-			category_form.secCateValue = "";
+			categoryFormValue.firstCateValue = firstCateItem.category_name;
+			categoryFormValue.secCateValue = "";
 			sec_cate_status.value = true;
 			editStatusChange({
 				first: false,
 				second: true,
-      });
+			});
 		};
 		/**
 		 * 添加子级请求
 		 */
-		const _addChildrenCategory = async (firstCateItem) => {
+		const AddChildrenCategory = async (firstCateItem) => {
 			let reqData = {
-				categoryName: category_form.secCateValue,
+				categoryName: categoryFormValue.secCateValue,
 				parentId: firstCateItem.id,
 			};
 			const [err, res] = await awaitWrap(addChildrenCategory(reqData));
-      console.log(res);
-      if(res){
-        let resData = res.data;
-        if(resData.resCode === 0) {message.success(resData.message);};
-        GetCategoryAll();
-      }
+			console.log(res);
+			if (res) {
+				let resData = res.data;
+				if (resData.resCode === 0) {
+					message.success(resData.message);
+				}
+				GetCategoryAll();
+			}
 		};
 		/**
 		 * mounted
 		 */
 		onMounted(() => {
-			GetCategoryAll();
+			GetCategoryAll().then(() => loading.value = false);
 		});
 		return {
 			//ref
 			categoryForm,
 			first_cate_status,
 			sec_cate_status,
+			loading,
 			//reactive
-			category_form,
+			categoryFormValue,
 			categoryData,
 			editFlag,
 
@@ -415,7 +437,7 @@ export default {
 			deleteFirstCate,
 			editSecCate,
 			deleteSecCate,
-			toggleCate
+			toggleCate,
 		};
 	},
 };

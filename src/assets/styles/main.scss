@@ -12,7 +12,7 @@ $menuMinWidth: 80px;
 }
 
 @mixin labelDom($width, $align, $line-height:"normal") {
-  label {
+  > label {
     float: left;
     line-height: $line-height + px;
     width: $width + px;
