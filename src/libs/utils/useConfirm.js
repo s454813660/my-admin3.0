@@ -8,7 +8,8 @@ export function useConfirm() {
       icon: createVNode(ExclamationCircleOutlined),
       okText: '确认',
       cancelText: '取消',
-      onOk: params.success
+      onOk: params.success,
+      onCancel: params.cancel
     })
   }
   return {

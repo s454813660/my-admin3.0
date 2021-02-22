@@ -177,6 +177,9 @@ export default {
         status: copydata.status,
         role: JSON.stringify(copydata.rolesChecked)
       }
+      
+      // ctx.emit("AddUser")
+      // return  调试
       addUser(reqData).then(res => {
         if(res.data.resCode === 0) {
           message.success(res.data.message);
@@ -196,9 +199,7 @@ export default {
             () => props.user ], ([val, user]) => {
       data.userEditVisible = val;
       console.log(user);
-      data.userFormData = Object.keys(user).map(item => {
-        console.log(item, user[item]);
-      })
+      
     });
     
     onBeforeMount(() => GetRoles())
@@ -217,9 +218,7 @@ export default {
 .user-edit-form {
   padding: 8px;
 }
-.form-item {
-  
-}
+
 .btn-group {
   text-align: center;
   margin-bottom: 32px;
