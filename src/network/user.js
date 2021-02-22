@@ -23,8 +23,23 @@ export function getUserList(params) {
  * 带星号是必填项
  */
 export function addUser(data) {
-  request({
+  return request({
     url: "/user/add/",
+    method: "post",
+    data
+  })
+};
+
+/**
+ * 删除用户
+ * 数组形式
+ * @param {
+ *  id: [1,2]
+ * } data 
+ */
+export function deleteUser(data) {
+  return request({
+    url: "/user/delete/",
     method: "post",
     data
   })

@@ -6,7 +6,7 @@
 			:size="tableOptions.size"
 			:bordered="tableOptions.bordered"
 			:pagination="false"
-			:loading="tableOptions.loading"
+			:loading="data.loading"
 		>
 			<template v-for="item in tableOptions.columns">
 				<a-table-column
@@ -32,16 +32,30 @@
 				</a-table-column>
 			</template>
 		</a-table>
-		<a-pagination></a-pagination>
+		<div class="user-table-footer">
+			<a-row>
+				<a-col :span="4">
+					<slot name="deleteall"></slot>
+				</a-col>
+				<a-col :span="20">
+					<slot name="pagination"></slot>
+					<!-- <a-pagination v-if="tableOptions.isPaginationShow"
+										showSizeChanger
+										:total="data.total"
+										v-model:current="data.current"
+										v-model:pageSize="data.pageSize"
+										@change="handlePageTurning"
+										class="pull-right"></a-pagination> -->
+				</a-col>
+			</a-row>
+		</div>
 	</div>
 </template>
 <script>
 // 引入组件
 // import Table from "ant-design-vue/lib/table";
 // import "ant-design-vue/lib/table/style/index";
-import { onBeforeMount, reactive } from "vue";
-import { useUserData } from "@/network/useUserData";
-import api from "@/network/api";
+import { onBeforeMount, reactive, watch } from "vue";
 export default {
 	name: "Table",
 	// components: { Table },
@@ -50,16 +64,23 @@ export default {
 			type: Object,
 			default: () => {},
 		},
+		dataSource: {
+			type: Object,
+			default: () => {}
+		},
+		loading: {
+			type: Boolean,
+			default: false
+		}
 	},
 	setup(props) {
-		const { userData:tableData, GetUserList } = useUserData();
+		console.log(props.dataSource);
 		const tableOptions = reactive({
 			rowSelection: {},
 			columns: [],
 			bordered: true,
-			loading: false,
       size: "default",
-			paginationOption: {},
+			isPaginationShow: false,
 			requestOptions: {}
 		});
 
@@ -74,53 +95,40 @@ export default {
 			}
 		};
 		const data = reactive({
-			tableData: [
-				{
-					key: "1",
-					username: "John Brown",
-					name: "John",
-					phone: "13588888888",
-					address: "New York No. 1 Lake Park",
-					role: "张三",
-				},
-				{
-					key: "2",
-					username: "Joe Black",
-					name: "Joe",
-					phone: "13588888888",
-					address: "London No. 1 Lake Park",
-					role: "李四",
-				},
-				{
-					key: "3",
-					username: "Jacky Brown",
-					name: "Jacky",
-					phone: "13588888888",
-					address: "London No. 1 Lake Park",
-					role: "王五",
-				},
-			],
+			tableData: [],
+			total: 0,
+			current: 1,
+			pageSize: 10,
+			loading: true
 		});
-		const getTableData = () => {
-			let requestOptions = tableOptions.requestOptions
-			// console.log(requestOptions);
-			const params = {
-				url: api[requestOptions.requestUrl],
-				method: "post",
-				data: requestOptions.data
-			}
-			// console.log(params);
-			// GetUserList(params);
-		}
+
 		
+		/**
+		 * 翻页操作事件处理函数
+		 */
+		const handlePageTurning = (page) => {
+			data.current = page;
+		}
+		/**
+		 * watch
+		 */
+		watch([ () => props.dataSource,
+						() => props.loading
+			], ([newdata, loading]) => {
+			data.tableData = Array.prototype.slice.call(newdata).map(item => {
+				item.key = item.id;
+				item.status = item.status == "1"? false : true;
+				return item
+			});
+			data.loading = loading;
+		});
 		onBeforeMount(() => {
 			initTableOptions();
-			getTableData()
 		});
 		return {
 			tableOptions,
 			data,
-			tableData
+			handlePageTurning,
 		};
 	},
 };
@@ -149,4 +157,8 @@ export default {
       </template>
  */
 </script>
-<style scoped></style>
+<style scoped lang="scss">
+.user-table-footer {
+	margin-top: 15px;
+}
+</style>

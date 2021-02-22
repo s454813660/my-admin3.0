@@ -1,6 +1,6 @@
 <template>
 	<div id="user">
-		<!-- user-header -->
+		<!-- user-header start -->
 		<a-row class="user-header" type="flex">
 			<a-col class="keyword">
 				<label class="pull-left">关键字：</label>
@@ -24,19 +24,37 @@
 				>
 			</a-col>
 		</a-row>
-		<TableComp class="user-table" :tableOptions="tableOptions">
-      <template #allowed>
-        <a-switch @change="isBanned"></a-switch>
-      </template>
-      <template #action="{record}">
-        <div class="btn-group">
-          <a-button type="danger" @click="deleteItem(record)">删除</a-button>
-          <a-button class="ant-btn-success">编辑</a-button>
-        </div>
-      </template>
-    </TableComp>
+		<!-- user-header end -->
+
+		<!-- userTabel start -->
+		<TableComp ref="user_table" class="user-table" 
+							:tableOptions="tableOptions"
+							:data-source="data.userTableData"
+							:loading="data.loading">
+			<template #allowed="{record}">
+				<a-switch :checked="record.record.status"></a-switch>
+			</template>
+			<template #action="{record}">
+				<div class="btn-group">
+					<a-button type="danger" @click="deleteItem(record)">删除</a-button>
+					<a-button class="ant-btn-success" @click="editItem(record)">编辑</a-button>
+				</div>
+			</template>
+			<template #deleteall>
+				<a-button @click="deleteAll">批量删除</a-button>
+			</template>
+			<template #pagination>
+				<a-pagination class="pull-right"></a-pagination>
+			</template>
+		</TableComp>
+		<!-- userTabel end -->
+
+		<!-- userEdit start -->
 		<UserEdit :isModalShow="data.isModalShow"
-							@closeEdit="closeEdit" />
+							@closeEdit="closeEdit"
+							@AddUser="AddUser"
+							:user="data.currentUser" />
+		<!-- userEdit end -->
 	</div>
 </template>
 <script>
@@ -44,7 +62,12 @@
 import SelectComp from "@/components/common/Select";
 import TableComp from "@/components/common/Table";
 import UserEdit from "./comps/UserEdit"
-import { onBeforeMount, reactive } from "vue";
+import { onBeforeMount, reactive, ref, watch } from "vue";
+import { deleteUser } from "@/network/user";
+import { useConfirm } from "@/libs/utils/useConfirm";
+import api from "@/network/api";
+import { useUserData } from "@/network/useUserData";
+import {message} from "ant-design-vue";
 export default {
 	name: "User",
 	components: {
@@ -53,7 +76,15 @@ export default {
 		UserEdit
 	},
 	setup() {
-		
+		onBeforeMount(() => {
+			getTableData();
+		})
+		// 公共数据
+		const { userData, GetUserList } = useUserData();
+		// 获取table的ref
+		const user_table = ref(null)
+		// 获取Comfirm
+		const { Confirm } = useConfirm();
 		// 选择框配置
 		const selectOptions = reactive({
 			value: undefined,
@@ -77,8 +108,8 @@ export default {
 				},
 				{
 					title: "真实姓名",
-					dataIndex: "name",
-					key: "name",
+					dataIndex: "truename",
+					key: "truename",
 					align: "center",
 				},
 				{
@@ -89,9 +120,10 @@ export default {
 				},
 				{
 					title: "地区",
-					dataIndex: "address",
-					key: "address",
+					dataIndex: "region",
+					key: "region",
 					align: "center",
+					width: 300
 				},
 				{
 					title: "角色",
@@ -115,6 +147,9 @@ export default {
       bordered: true,
       rowSelection: {
         columnWidth: 45,
+				onChange(keys, rows) {
+					data.userId = rows.map(item => item.id)
+				}
       },
 			requestOptions: {
 				requestUrl: "getUserList",
@@ -122,43 +157,83 @@ export default {
 					pageNumber: 1,
 					pageSize: 10
 				}
-			}
+			},
+			isPaginationShow: true,
     });
     
 		const data = reactive({
       searchValue: "",
-			status: "",
+			status: false,
 			isModalShow: false,
-			userFormData: {}
+			userFormData: {},
+			userId: [],
+			userTableData: [],
+			loading: true,
+			currentUser: {}
 		});
 
 		/**
-		 * 禁/启用事件处理函数
+		 * 获取数据
 		 */
-		const isBanned = (status) => {
-			switch(status) {
-				case true:
-					data.status = 2;
-					break;
-				case false:
-					data.status = 1;
-					break;
-				default:
-					break;
-			}
-			// console.log(data.status);
+		const getTableData = () => {
+			let requestOptions = tableOptions.requestOptions;
+			const reqParams = {
+				url: api[requestOptions.requestUrl],
+				method: "post",
+				data: requestOptions.data
+			};
+			GetUserList(reqParams)
 		}
+		/**
+		 * 删除当前项
+		 */
+		const DeleteUserItem = () => {
+			let reqData = {
+				id: data.userId
+			}
+			deleteUser(reqData).then(res => {
+				let resData = res.data;
+				if(resData.resCode === 0) {
+					message.success(resData.message);
+					getTableData();
+				}
+			})
+		}
+		
  		/**
 		 * 删除当前项事件处理函数
 		 */
     const deleteItem = (record) => {
-      console.log(record);
-    }
+			data.userId = [record.record.id]
+			Confirm({
+				title: "是否删除当前项？",
+				success: DeleteUserItem
+			})
+    };
+		/**
+		 * 
+		 */
+		const editItem = (record) => {
+			openModal();
+			data.currentUser = record.record
+		}
+		/**
+		 * 删除选中项事件处理函数
+		 */
+		const deleteAll = () => {
+			if(data.userId.length > 0){
+				Confirm({
+					title: "是否删除选中项？",
+					success: DeleteUserItem
+				})
+			}
+		}
 		/**
 		 * openModal 打开对话框事件处理函数
 		 */
 		const openModal = () => {
 			data.isModalShow = true;
+			data.currentUser = {}
 		}
 		/**
 		 * 接受自定义事件
@@ -169,20 +244,30 @@ export default {
 		const closeEdit = (val) => {
 			data.isModalShow = val
 		}
-		onBeforeMount(() => {
-			// GetUserList({
-			// 	pageNumber: 1,
-			// 	pageSize: 10
-			// })
-		})
+		/**
+		 * 接收添加user的自定义事件，调用更新table视图
+		 */
+		const AddUser = () => {
+			getTableData();
+		};
+		/**
+		 * watch
+		 */
+		watch(() => userData.data, (val) => {
+			data.userTableData = val;
+			data.loading = false;
+		});
 		return {
+			user_table,
       selectOptions,
       tableOptions,
       data,
       deleteItem,
-			isBanned,
+			editItem,
 			openModal,
-			closeEdit
+			closeEdit,
+			AddUser,
+			deleteAll,
 		};
 	},
 };

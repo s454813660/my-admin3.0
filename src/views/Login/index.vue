@@ -198,7 +198,7 @@ export default {
         password: values.password,
         code: values.captcha
       };
-      console.log(reqData);
+      // console.log(reqData);
       const [err, res] = await awaitWrap(login(reqData));
       
       // console.log(res);
