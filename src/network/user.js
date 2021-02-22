@@ -31,6 +31,20 @@ export function addUser(data) {
 };
 
 /**
+ * 用户禁启用
+ * @param {
+ *  id: 用户ID（number）
+ *  status: 状态（string）1：禁用，2：启用
+ * } data 
+ */
+export function statusActive(data) {
+  return request({
+    url: "/user/actives/",
+    method: "POST",
+    data
+  })
+}
+/**
  * 删除用户
  * 数组形式
  * @param {

@@ -29,10 +29,9 @@
 		<!-- userTabel start -->
 		<TableComp ref="user_table" class="user-table" 
 							:tableOptions="tableOptions"
-							:data-source="data.userTableData"
 							:loading="data.loading">
 			<template #allowed="{record}">
-				<a-switch :checked="record.record.status"></a-switch>
+				<a-switch v-model:checked="record.record.status" @change="(val)=> handleChangeStatus(val, record.record)"></a-switch>
 			</template>
 			<template #action="{record}">
 				<div class="btn-group">
@@ -63,10 +62,9 @@ import SelectComp from "@/components/common/Select";
 import TableComp from "@/components/common/Table";
 import UserEdit from "./comps/UserEdit"
 import { onBeforeMount, reactive, ref, watch } from "vue";
-import { deleteUser } from "@/network/user";
+import { deleteUser, statusActive } from "@/network/user";
 import { useConfirm } from "@/libs/utils/useConfirm";
-import api from "@/network/api";
-import { useUserData } from "@/network/useUserData";
+
 import {message} from "ant-design-vue";
 export default {
 	name: "User",
@@ -75,12 +73,7 @@ export default {
 		TableComp,
 		UserEdit
 	},
-	setup() {
-		onBeforeMount(() => {
-			getTableData();
-		})
-		// 公共数据
-		const { userData, GetUserList } = useUserData();
+	setup() {		
 		// 获取table的ref
 		const user_table = ref(null)
 		// 获取Comfirm
@@ -172,22 +165,11 @@ export default {
 			currentUser: {}
 		});
 
+		
 		/**
-		 * 获取数据
+		 * 删除项方法
 		 */
-		const getTableData = () => {
-			let requestOptions = tableOptions.requestOptions;
-			const reqParams = {
-				url: api[requestOptions.requestUrl],
-				method: "post",
-				data: requestOptions.data
-			};
-			GetUserList(reqParams)
-		}
-		/**
-		 * 删除当前项
-		 */
-		const DeleteUserItem = () => {
+		const DeleteUser = () => {
 			let reqData = {
 				id: data.userId
 			}
@@ -195,11 +177,37 @@ export default {
 				let resData = res.data;
 				if(resData.resCode === 0) {
 					message.success(resData.message);
-					getTableData();
+					refreshData();
+				}
+			})
+		};
+		/**
+		 * 用户禁启用方法
+		 */
+		const handleStatusActive = (val, record) => {
+			let reqData = {
+				id: record.id,
+				status: val === true? "2" : "1"
+			}
+			statusActive(reqData).then(res => {
+				if(res.data.resCode === 0) {
+					message.success(res.data.message);
+					refreshData();
 				}
 			})
 		}
-		
+		/**
+		 * 取消禁启用修改回调
+		 */
+		const cancelStatusActive = () => {
+			refreshData();
+		}
+		/**
+		 * 更新表格数据
+		 */
+		const refreshData = () => {
+			user_table.value.getTableData();
+		}
  		/**
 		 * 删除当前项事件处理函数
 		 */
@@ -207,11 +215,12 @@ export default {
 			data.userId = [record.record.id]
 			Confirm({
 				title: "是否删除当前项？",
-				success: DeleteUserItem
+				success: DeleteUser,
+				
 			})
     };
 		/**
-		 * 
+		 * 编辑当前项时间处理函数
 		 */
 		const editItem = (record) => {
 			openModal();
@@ -224,9 +233,23 @@ export default {
 			if(data.userId.length > 0){
 				Confirm({
 					title: "是否删除选中项？",
-					success: DeleteUserItem
+					success: DeleteUser
 				})
+			}else {
+				message.warn("请选择你要删除的项！")
 			}
+		};
+
+		/**
+		 * 改变状态事件处理函数
+		 */
+		const handleChangeStatus = (val, record) => {
+			Confirm({
+				title: "确认修改状态吗？",
+				success: () => handleStatusActive(val, record),
+				cancel: cancelStatusActive
+			});
+			
 		}
 		/**
 		 * openModal 打开对话框事件处理函数
@@ -248,15 +271,10 @@ export default {
 		 * 接收添加user的自定义事件，调用更新table视图
 		 */
 		const AddUser = () => {
-			getTableData();
+			// getTableData();
+			refreshData();
 		};
-		/**
-		 * watch
-		 */
-		watch(() => userData.data, (val) => {
-			data.userTableData = val;
-			data.loading = false;
-		});
+		
 		return {
 			user_table,
       selectOptions,
@@ -268,6 +286,7 @@ export default {
 			closeEdit,
 			AddUser,
 			deleteAll,
+			handleChangeStatus
 		};
 	},
 };

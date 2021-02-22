@@ -56,6 +56,8 @@
 // import Table from "ant-design-vue/lib/table";
 // import "ant-design-vue/lib/table/style/index";
 import { onBeforeMount, reactive, watch } from "vue";
+import { useUserData } from "@/network/useUserData";
+import api from "@/network/api";
 export default {
 	name: "Table",
 	// components: { Table },
@@ -64,17 +66,14 @@ export default {
 			type: Object,
 			default: () => {},
 		},
-		dataSource: {
-			type: Object,
-			default: () => {}
-		},
 		loading: {
 			type: Boolean,
 			default: false
 		}
 	},
 	setup(props) {
-		console.log(props.dataSource);
+		// 公共数据
+		const { userData, GetUserList } = useUserData();
 		const tableOptions = reactive({
 			rowSelection: {},
 			columns: [],
@@ -102,7 +101,18 @@ export default {
 			loading: true
 		});
 
-		
+		/**
+		 * 获取数据
+		 */
+		const getTableData = () => {
+			let requestOptions = tableOptions.requestOptions;
+			const reqParams = {
+				url: api[requestOptions.requestUrl],
+				method: "post",
+				data: requestOptions.data
+			};
+			GetUserList(reqParams)
+		}
 		/**
 		 * 翻页操作事件处理函数
 		 */
@@ -112,8 +122,8 @@ export default {
 		/**
 		 * watch
 		 */
-		watch([ () => props.dataSource,
-						() => props.loading
+		watch([ () => userData.data,
+						() => userData.loading
 			], ([newdata, loading]) => {
 			data.tableData = Array.prototype.slice.call(newdata).map(item => {
 				item.key = item.id;
@@ -124,11 +134,14 @@ export default {
 		});
 		onBeforeMount(() => {
 			initTableOptions();
+			getTableData();
 		});
 		return {
 			tableOptions,
+			userData,
 			data,
 			handlePageTurning,
+			getTableData
 		};
 	},
 };
