@@ -1,6 +1,14 @@
 import { request } from "./request";
 /**
  * 用户列表
+ * @param {
+ *  username：用户名（string）
+ *  truename：真实姓名（string）
+ *  phone：手机号（number）
+ *  pageNumber：页码（number）*
+ *  pageSize：数量（number）*
+ * } data 
+ *    
  */
 export function getUserList(params) {
   return request({
@@ -58,12 +66,44 @@ export function deleteUser(data) {
     data
   })
 }
+
+/**
+ * 
+ * @param {
+ *  id：用户ID（number）*
+ * username：用户名（string）*
+ * truename：真实姓名（string）
+ * password：密码（string） 非必传项
+ * phone：手机号（number）
+ * region：地区（json）
+ * status：禁启用状态（string）*
+ * role：角色类型（string）*
+ * btnPerm：按钮权限（string）*
+ * } data 
+ */
+export function editUser(data) {
+  return request({
+    url: "/user/edit/",
+    method: "post",
+    data
+  })
+}
 /**
  * 获取角色
  */
 export function getRoles(data = {}) {
   return request({
     url: "/role/",
+    method: "post",
+    data
+  })
+}
+/**
+ * 获取系统
+ */
+export function getSystems(data = {}) {
+  return request({
+    url: "/system/",
     method: "post",
     data
   })

@@ -195,7 +195,7 @@ export default {
     async function Login(values) {
       let reqData = {
         username: values.username,
-        password: values.password,
+        password: sha1(values.password),
         code: values.captcha
       };
       // console.log(reqData);
@@ -224,7 +224,7 @@ export default {
     async function Register(values) {
       let reqData = {
         username: values.username,
-        password: values.password,
+        password: sha1(values.password),
         code:values.captcha
       };
       const [err, res] = await awaitWrap(register(reqData));
@@ -294,7 +294,6 @@ export default {
         const [err, res] = await awaitWrap(getCaptcha(reqData));
         let resData = res.data;
         message.success(resData.message);
-        console.log(resData);
         loginBtnStatus.value = false;
         countdown(60);
       }, 3000)

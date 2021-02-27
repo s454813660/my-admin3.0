@@ -55,7 +55,7 @@ export default {
     const preOpenKeys = ref([routes[2].path]);
     
     // methods
-    function toggleMenu(e) {
+    const toggleMenu = (e) => {
       const currentRoute = e.key;
       router.push(currentRoute);
     }

@@ -2,10 +2,13 @@
   <a-select v-model:value="selectOptions.value"
             :placeholder="selectOptions.placeholder"
             :allowClear="selectOptions.allowClear"
-            :size="selectOptions.size">
+            :size="selectOptions.size"
+            @change="selectChange">
     <a-select-option v-for="(item, index) in selectOptions.options"
                      :key="item.type + index"
-                     :value="item.type">
+                     :value="item.type"
+                     :label="item.label"
+                     >
                     {{item.label}}  
                   </a-select-option>
   </a-select>
@@ -36,6 +39,13 @@ export default {
       }
     }
     /**
+     * 选择框改变事件处理函数
+     */
+    const selectChange = (val) => {
+      console.log(val);
+      ctx.emit("update", val)
+    }
+    /**
      * 改变值事件处理函数
      */
     onBeforeMount(() => {
@@ -44,6 +54,7 @@ export default {
 
     return {
       selectOptions,
+      selectChange
     }
   }
 }

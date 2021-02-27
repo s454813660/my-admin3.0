@@ -39,22 +39,20 @@
 				</a-col>
 				<a-col :span="20">
 					<slot name="pagination"></slot>
-					<!-- <a-pagination v-if="tableOptions.isPaginationShow"
-										showSizeChanger
+					<a-pagination v-if="tableOptions.isPaginationShow"
+										show-size-changer
 										:total="data.total"
 										v-model:current="data.current"
 										v-model:pageSize="data.pageSize"
 										@change="handlePageTurning"
-										class="pull-right"></a-pagination> -->
+										@showSizeChange="handleSizeChange"
+										class="pull-right"></a-pagination>
 				</a-col>
 			</a-row>
 		</div>
 	</div>
 </template>
 <script>
-// 引入组件
-// import Table from "ant-design-vue/lib/table";
-// import "ant-design-vue/lib/table/style/index";
 import { onBeforeMount, reactive, watch } from "vue";
 import { useUserData } from "@/network/useUserData";
 import api from "@/network/api";
@@ -104,12 +102,19 @@ export default {
 		/**
 		 * 获取数据
 		 */
-		const getTableData = () => {
+		const getTableData = (params) => {
 			let requestOptions = tableOptions.requestOptions;
+			const reqData = {
+				username: params? params.username : "",
+				truename: params? params.truename : "",
+				phone: params? params.phone : "",
+				pageNumber: data.current,
+				pageSize: data.pageSize
+			}
 			const reqParams = {
 				url: api[requestOptions.requestUrl],
 				method: "post",
-				data: requestOptions.data
+				data: reqData
 			};
 			GetUserList(reqParams)
 		}
@@ -118,19 +123,40 @@ export default {
 		 */
 		const handlePageTurning = (page) => {
 			data.current = page;
+			getTableData();
+		}
+
+		/**
+		 * 改变页面展示数量事件处理函数
+		 */
+		const handleSizeChange = (current, size) => {
+			data.pageSize = size;
+			data.current = current;
+			getTableData()
 		}
 		/**
 		 * watch
 		 */
 		watch([ () => userData.data,
-						() => userData.loading
-			], ([newdata, loading]) => {
+						() => userData.loading,
+						() => userData.total
+			], ([newdata, loading, total]) => {
 			data.tableData = Array.prototype.slice.call(newdata).map(item => {
+				let region = JSON.parse(item.region);
+				let newRegion = {};
+				let domain = [];
+				for(let key in region) {
+					(/Value?/.test(key))?newRegion[key] =  region[key] :
+					domain.push(region[key])
+				}
+				item.region = JSON.stringify(newRegion);
+				item.domain = domain.join();
 				item.key = item.id;
 				item.status = item.status == "1"? false : true;
 				return item
 			});
 			data.loading = loading;
+			data.total = total
 		});
 		onBeforeMount(() => {
 			initTableOptions();
@@ -141,6 +167,7 @@ export default {
 			userData,
 			data,
 			handlePageTurning,
+			handleSizeChange,
 			getTableData
 		};
 	},

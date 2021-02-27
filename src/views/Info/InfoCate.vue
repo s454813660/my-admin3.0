@@ -416,7 +416,7 @@ export default {
 		 * mounted
 		 */
 		onMounted(() => {
-			GetCategoryAll().then(() => loading.value = false);
+			GetCategoryAll().then(() => loading.value = false).catch(err => loading.value = false);
 		});
 		return {
 			//ref

@@ -82,7 +82,8 @@ export default {
 			changeProvince,
 			changeCity,
       changeArea,
-      changeStreet
+      changeStreet,
+			refresh
 		} = useCityPicker();
 
     const init = reactive({
@@ -107,13 +108,21 @@ export default {
     onBeforeMount(() => {
       initCityPicker()
     })
+
+		/**
+		 * 清空城市选择器
+		 */
+		const refreshCityPicker = () => {
+			refresh();
+		}
+
     watch([
       () => resultData.provinceValue,
       () => resultData.cityValue,
       () => resultData.areaValue,
       () => resultData.streetValue,
     ], ([province, city, area, street]) => {
-      ctx.emit("updateCityPickerData", resultData);
+      ctx.emit("updateRegion", resultData);
     })
 		return {
 			data,
@@ -121,7 +130,8 @@ export default {
 			changeProvince,
 			changeCity,
       changeArea,
-      changeStreet
+      changeStreet,
+			refreshCityPicker
 		};
 	},
 };

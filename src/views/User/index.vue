@@ -5,18 +5,20 @@
 			<a-col class="keyword">
 				<label class="pull-left">关键字：</label>
 				<div class="content-wrap">
-					<SelectComp :selectOptions="selectOptions" style="width: 100%" />
+					<SelectComp :selectOptions="selectOptions" 
+											style="width: 100%"
+											@update="updateKeyword" />
 				</div>
 			</a-col>
 			<a-col class="search-input">
 				<a-input
 					placeholder="请输入"
-					v-model:value="data.searchValue"
+					v-model:value.trim="data.searchValue"
 					style="fontSize: 15px;height: 40px"
 				></a-input>
 			</a-col>
 			<a-col class="search-btn">
-				<a-button type="danger" size="large">搜索</a-button>
+				<a-button type="danger" size="large" @click="userSearch">搜索</a-button>
 			</a-col>
 			<a-col flex="auto">
 				<a-button type="danger" size="large" style="float:right;width: 98px"
@@ -42,16 +44,13 @@
 			<template #deleteall>
 				<a-button @click="deleteAll">批量删除</a-button>
 			</template>
-			<template #pagination>
-				<a-pagination class="pull-right"></a-pagination>
-			</template>
 		</TableComp>
 		<!-- userTabel end -->
 
 		<!-- userEdit start -->
 		<UserEdit :isModalShow="data.isModalShow"
 							@closeEdit="closeEdit"
-							@AddUser="AddUser"
+							@refreshUser="refreshUser"
 							:user="data.currentUser" />
 		<!-- userEdit end -->
 	</div>
@@ -61,7 +60,7 @@
 import SelectComp from "@/components/common/Select";
 import TableComp from "@/components/common/Table";
 import UserEdit from "./comps/UserEdit"
-import { onBeforeMount, reactive, ref, watch } from "vue";
+import { reactive, ref } from "vue";
 import { deleteUser, statusActive } from "@/network/user";
 import { useConfirm } from "@/libs/utils/useConfirm";
 
@@ -85,7 +84,8 @@ export default {
 			size: "large",
 			options: [
 				{ type: "phone", label: "手机" },
-				{ type: "name", label: "姓名" },
+				{ type: "truename", label: "姓名" },
+				{ type: "username", label: "用户名" },
 			],
 			allowClear: true,
 		});
@@ -113,8 +113,8 @@ export default {
 				},
 				{
 					title: "地区",
-					dataIndex: "region",
-					key: "region",
+					dataIndex: "domain",
+					key: "domain",
 					align: "center",
 					width: 300
 				},
@@ -162,10 +162,21 @@ export default {
 			userId: [],
 			userTableData: [],
 			loading: true,
-			currentUser: {}
+			currentUser: {},
+			keyword: ""
 		});
 
-		
+		/**
+		 * userSearch 用户搜索时间处理函数
+		 */
+		const userSearch = () => {
+			if(data.keyword){
+				data.searchValue = data.keyword === "phone"? Number(data.searchValue) : data.searchValue
+				refreshData({[data.keyword]:data.searchValue})
+			}else{
+				refreshData();
+			}
+		}
 		/**
 		 * 删除项方法
 		 */
@@ -205,8 +216,8 @@ export default {
 		/**
 		 * 更新表格数据
 		 */
-		const refreshData = () => {
-			user_table.value.getTableData();
+		const refreshData = (params) => {
+			user_table.value.getTableData(params);
 		}
  		/**
 		 * 删除当前项事件处理函数
@@ -216,7 +227,6 @@ export default {
 			Confirm({
 				title: "是否删除当前项？",
 				success: DeleteUser,
-				
 			})
     };
 		/**
@@ -262,6 +272,13 @@ export default {
 		 * 接受自定义事件
 		 */
 		/**
+		 * 更新关键字选择框
+		 */
+		const updateKeyword = (val) => {
+			// console.log(val);
+			data.keyword = val;
+		}
+		/**
 		 * closeModal 关闭对话框
 		 */
 		const closeEdit = (val) => {
@@ -270,7 +287,7 @@ export default {
 		/**
 		 * 接收添加user的自定义事件，调用更新table视图
 		 */
-		const AddUser = () => {
+		const refreshUser = () => {
 			// getTableData();
 			refreshData();
 		};
@@ -280,18 +297,23 @@ export default {
       selectOptions,
       tableOptions,
       data,
+			userSearch,
       deleteItem,
 			editItem,
 			openModal,
 			closeEdit,
-			AddUser,
+			refreshUser,
 			deleteAll,
-			handleChangeStatus
+			handleChangeStatus,
+			updateKeyword
 		};
 	},
 };
 </script>
 <style scoped lang="scss">
+#user {
+	margin-bottom: 30px;
+}
 .user-header {
 	label {
 		font-size: 14px;

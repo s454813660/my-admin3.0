@@ -19,7 +19,7 @@ export default {
 </script>
 <style lang="scss" scoped>
 #layout-main {
-  position: absolute;
+  position: fixed;
   top: 75px;
   // left: $menuWidth;
   right: 0;
@@ -29,6 +29,7 @@ export default {
   border-bottom: none;
   transition: all ease 0.3s;
   padding: 30px;
+  overflow: scroll;
   &.open {
     left: $menuWidth;
   }

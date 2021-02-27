@@ -335,14 +335,15 @@ export default {
 			}
 			getList(params).then(res => {
 				let resData = res.data.data;
-				resData.data.forEach(item => {
+				let copyData = JSON.parse(JSON.stringify(resData));
+				copyData.data.forEach(item => {
 					item.key = item.id;
 					item.categoryName = formatCategoryName(item.categoryId)
 					item.createDate = formatDate(item.createDate*1, "Y-M-D h:m:s")
 				});
-			infoData.data = resData.data;
-			paginationOptions.total = resData.total;
-			data.loading = false;
+				infoData.data = copyData.data;
+				paginationOptions.total = copyData.total;
+				data.loading = false;
 			}).catch(err=> {})
 		}
 		/**

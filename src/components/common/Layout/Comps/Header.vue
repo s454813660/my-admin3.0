@@ -27,11 +27,11 @@ export default {
     const router = useRouter();
     const collapsed = computed(() => store.state.app.iscollapsed);
     const username = computed(() => store.state.app.username)
-    function toggleCollapsed() {
+    const toggleCollapsed = () => {
       store.commit("app/SET_COLLAPSED");
     }
 
-    function exit() {
+    const exit = () => {
       removeUsername();
       removeToken();
       store.commit("app/SET_TOKEN", "");

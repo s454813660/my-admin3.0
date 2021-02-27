@@ -3,7 +3,7 @@
     <a-modal v-model:visible="data.userEditVisible"
              @cancel="closeEdit"
              :width="576"
-             @ok="handleAddUser"
+             @ok="handleSubmit"
              :footer="null">
       <!-- modal title start -->
       <template #title>
@@ -18,7 +18,7 @@
               ref="userEditForm"
               :labelCol="{span: 4}"
               :wrapperCol="{span: 19,offset: 1}"
-              @finish="handleAddUser">
+              @finish="handleSubmit">
         <a-form-item name="username" label="用户名:" has-feedback class="form-item username" >
           <a-input placeholder="请输入用户名"
                   style="height: 40px; width: 100%"
@@ -29,10 +29,10 @@
                   style="height: 40px; width: 100%"
                   v-model:value="data.userFormData.password"></a-input-password>
         </a-form-item>
-        <a-form-item name="name" label="姓名:" has-feedback class="form-item name">
+        <a-form-item name="truename" label="姓名:" has-feedback class="form-item name">
           <a-input placeholder="请输入姓名"
                   style="height: 40px; width: 100%"
-                  v-model:value="data.userFormData.name"></a-input>
+                  v-model:value="data.userFormData.truename"></a-input>
         </a-form-item>
         <a-form-item name="phone" label="手机号:" has-feedback class="form-item phone">
           <a-input placeholder="请输入手机号"
@@ -41,10 +41,10 @@
                   ></a-input>
         </a-form-item>
   
-        <a-form-item name="area" label="地区:" class="form-item area">
-          <CityPicker :cityPickerData="data.userFormData.cityPickerData"
-                      @updateCityPickerData="updateCityPickerData"
-                      ></CityPicker>
+        <a-form-item name="region" label="地区:" class="form-item region">
+          <CityPicker 
+                      @updateRegion="updateRegion"
+                      ref="cityPicker"></CityPicker>
         </a-form-item>
         <a-form-item name="status" label="禁启用状态:" class="form-item status">
           <a-radio-group v-model:value="data.userFormData.status">
@@ -52,8 +52,8 @@
             <a-radio value="2">启用</a-radio>
           </a-radio-group>
         </a-form-item>
-        <a-form-item name="rolesChecked" label="是否启用:" class="form-item roles">
-          <a-checkbox-group v-model:value="data.userFormData.rolesChecked">
+        <a-form-item name="role" label="是否启用:" class="form-item roles">
+          <a-checkbox-group v-model:value="data.userFormData.role">
             <a-checkbox v-for="item in data.roles" 
                         :key="item.role"
                         :value="item.role"
@@ -73,7 +73,7 @@
 import SelectComp from "@/components/common/Select";
 import CityPicker from "@/components/common/CityPicker";
 import { reactive, watch, ref, onBeforeMount } from "vue";
-import { getRoles, addUser } from "@/network/user";
+import { getRoles, addUser, editUser } from "@/network/user";
 import { useConfirm } from "@/libs/utils/useConfirm";
 import { checkEmail, checkPass, stripscript } from "@/libs/validateTools";
 import { message } from "ant-design-vue";
@@ -95,21 +95,23 @@ export default {
   },
   
   setup(props, ctx) {
-    console.log(props.user);
-    const userEditForm = ref(null)
+    const userEditForm = ref(null);
+    const cityPicker = ref(null);
+
+    const { Confirm } = useConfirm();
     const data = reactive({
       userEditVisible: false,
+      //角色
+      roles: [],
       userFormData: {
         username: "",
         password: "",
-        name: "",
+        truename: "",
         phone: undefined,
         //城市数据对象
-        cityPickerData: {},
+        region: {},
         status: "1",
-        rolesChecked: [],
-        //角色
-        roles: []
+        role: []
       },
     });
     
@@ -131,15 +133,23 @@ export default {
      * 校验用户名/邮箱
      */
     const validatePassword = async (rule, value) => {
-      if (value === '') {
-        return Promise.reject("密码不能为空！");
-      }else {
-        if(!checkPass(value)) {
-          return Promise.reject("密码格式不正确！请输入6~15位含数字字母符号的密码！");
-        }else {
+      // 有id 密码为空  不校验
+      //  有id 密码不为空 校验
+      // 没id 校验
+      if(data.userFormData.id && data.userFormData.password === ""){
           return Promise.resolve();
+      }else{
+        if (value === '') {
+          return Promise.reject("密码不能为空！");
+        }else {
+          if(!checkPass(value)) {
+            return Promise.reject("密码格式不正确！请输入6~15位含数字字母符号的密码！");
+          }else {
+            return Promise.resolve();
+          }
         }
       }
+      
     };
     /**
      * 校验规则 rules
@@ -147,7 +157,7 @@ export default {
     const rules = {
       username: [{ validator: validateUsername, trigger: ['change', "blur"] }],
       password: [{ validator: validatePassword, trigger: ['change', "blur"] }],
-      rolesChecked: [{ type: "array", required: true, defaultField: { type: "string" }, message: "必填项"}]
+      role: [{ type: "array", required: true, defaultField: { type: "string" }, message: "必填项"}]
     }
     /**
      * 请求roles
@@ -158,33 +168,61 @@ export default {
       })
     }
     /**
-     * 接受自定义事件修改cityPickerData
+     * 接受自定义事件修改r
      */
-    const updateCityPickerData = (payload) => {
-      data.userFormData.cityPickerData = payload
+    const updateRegion = (payload) => {
+      data.userFormData.region = payload
     }
     /**
      * 添加用户事件处理函数
      */
-    const handleAddUser = (e) => {
+    const handleSubmit = (e) => {
       const copydata = JSON.parse(JSON.stringify(data.userFormData));
       const reqData = {
+        id: copydata.id? copydata.id: "",
         username: copydata.username,
-        truename: copydata.name,
+        truename: copydata.truename,
         password: sha1(copydata.password),
         phone: copydata.phone,
-        region: JSON.stringify(copydata.cityPickerData),
+        region: typeof copydata.region === "string" ? copydata.region : JSON.stringify(copydata.region),
         status: copydata.status,
-        role: JSON.stringify(copydata.rolesChecked)
+        role: copydata.role.join(",")
       }
-      
-      // ctx.emit("AddUser")
-      // return  调试
+      if(data.userFormData.id){
+        Confirm({
+          title: "确认修改当前项吗？",
+          success: () => EditUser(reqData)
+        })
+      }else{
+        AddUser(reqData);
+      }
+    }
+    /**
+     * 编辑用户
+     */
+    const EditUser = (reqData) => {
+      editUser(reqData).then(res => {
+        if(res.data.resCode === 0){
+          message.success(res.data.message);
+          closeEdit();
+          ctx.emit("refreshUser");
+        }
+      })
+    }
+    /**
+     * 新增用户
+     */
+    const AddUser = (reqData) => { 
+      // console.log(reqData);
+      // // ctx.emit("AddUser")
+      // return  //调试
       addUser(reqData).then(res => {
         if(res.data.resCode === 0) {
           message.success(res.data.message);
           closeEdit();
-          ctx.emit("AddUser")
+          ctx.emit("refreshUser");
+          /// 清空citypicker的值
+          cityPicker.value.refreshCityPicker();
         }
       })
     }
@@ -192,24 +230,38 @@ export default {
      * 关闭对话框事件处理函数
      */
     const closeEdit = () => {
-      ctx.emit("closeEdit", false)
-      userEditForm.value.resetFields()
+      ctx.emit("closeEdit", false);
+      
+      userEditForm.value.resetFields();
+      /// 清空citypicker的值
+      cityPicker.value.refreshCityPicker();
     }
     watch([ () => props.isModalShow,
             () => props.user ], ([val, user]) => {
       data.userEditVisible = val;
-      console.log(user);
-      
+      data.userFormData = JSON.parse(JSON.stringify(user));
+      if(Object.keys(user).length > 0){
+        data.userFormData.status = data.userFormData.status? "2": "1";
+        data.userFormData.role = data.userFormData.role.split(",");
+        data.userFormData.password = "";
+      }else{
+        data.userFormData.status = "1";
+      }
     });
     
     onBeforeMount(() => GetRoles())
     return {
+      // data
       data,
+      // validate rule
       rules,
-      closeEdit,
-      updateCityPickerData,
+      //refs
       userEditForm,
-      handleAddUser
+      cityPicker,
+      // method
+      updateRegion,
+      closeEdit,
+      handleSubmit
     }
   }
 }
